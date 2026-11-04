@@ -22,6 +22,9 @@
   --aster-ik-brand-iris: #6a5cff;
   --aster-ik-brand-aqua: #2cd4c4;
 
+  /* The full-colour mark's square: white on dark grounds, ink on light. */
+  --aster-ik-brand-mark-square: #ffffff;
+
   /* Semantic surfaces and text — dark (the default theme). */
   --aster-ik-bg: #09090b;
   --aster-ik-card: #0e0e11;
@@ -76,6 +79,8 @@
 
 [data-theme='light'] {
   color-scheme: light;
+
+  --aster-ik-brand-mark-square: #161616;
 
   --aster-ik-bg: #ffffff;
   --aster-ik-card: #ffffff;
