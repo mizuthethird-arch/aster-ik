@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
   pull_request:
-    branches: [main]
+    branches: [main, dev]
 
 # One run per branch/PR; a new push cancels the outdated run.
 concurrency:
@@ -67,10 +67,11 @@ jobs:
           retention-days: 7
           if-no-files-found: error
 
-  # Test deploy: every merge to main republishes the Pages site. PRs never deploy.
+  # Test deploy: every merge to dev republishes the Pages site. `main` is production and
+  # does not publish here; feature PRs never deploy.
   deploy:
     name: deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
     needs: verify
     runs-on: ubuntu-24.04
     timeout-minutes: 10
