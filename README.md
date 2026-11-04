@@ -54,6 +54,18 @@ cd frontend
 docker compose run --rm frontend sh -lc 'pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm build && pnpm format:check'
 ```
 
+## Test deploy (GitHub Pages)
+
+Every merge to `main` publishes the built app to GitHub Pages — no `gh-pages` branch, Pages is
+fed directly from the Actions artifact:
+
+- URL: https://mizuthethird-arch.github.io/aster-ik/
+- Trigger: `push` to `main` only; pull requests build but never deploy
+- Build base path: `VITE_BASE=/aster-ik/` (Pages serves the repo under a subpath)
+
+Pull requests get no preview URL: GitHub Pages publishes one site per repository. Production will
+be self-hosted later — GitHub Pages is the test surface only.
+
 ## Security
 
 - No secrets in the repo. Runtime configuration goes through GitHub Actions secrets and

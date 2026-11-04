@@ -4,6 +4,9 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  // GitHub Pages serves this repo under /aster-ik/, so CI sets VITE_BASE=/aster-ik/.
+  // Local dev and docker leave it unset and stay on /.
+  base: process.env.VITE_BASE ?? '/',
   plugins: [react(), tailwindcss()],
   server: {
     // The dev server is only reachable from the browser if it binds all interfaces:
