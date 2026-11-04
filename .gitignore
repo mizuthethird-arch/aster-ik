@@ -1,0 +1,25 @@
+# Internal agent brains: development state, not part of the product
+agents-brain/
+
+# Dependencies and build output
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.pnpm-store/
+
+# Local state
+*.log
+.env
+.env.*
+!.env.example
+
+# Scratch files used for one-off recon, never committed
+.tmp-*
+
+# Editors and OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

@@ -1,0 +1,39 @@
+# Development workspace for the frontend. Everything — Node, pnpm, ESLint, Prettier,
+# Vite and the dependencies — lives inside this container. Nothing is installed on the host.
+name: aster-ik
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: aster-ik-frontend-dev:local
+    working_dir: /app
+    ports:
+      # 5173 on the host is taken by another project, so this workspace publishes 5273.
+      - '${FRONTEND_PORT:-5273}:5173'
+    volumes:
+      # The source, live: edits on the host show up in the container.
+      - .:/app
+      # The container's own node_modules and pnpm store, never the host's.
+      - node_modules:/app/node_modules
+    environment:
+      # The source arrives over a Windows bind mount, where file-change events are unreliable.
+      CHOKIDAR_USEPOLLING: 'true'
+    # First start installs from the lockfile into the volume; later starts are a no-op.
+    command: sh -lc "pnpm install --frozen-lockfile && pnpm dev"
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:5173/').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+volumes:
+  node_modules:

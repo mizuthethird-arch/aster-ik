@@ -1,0 +1,11 @@
+# The dev image only carries the toolchain; the source is bind-mounted at runtime.
+node_modules
+dist
+coverage
+.git
+.gitignore
+.devcontainer
+*.log
+.env
+.env.*
+.pnpm-store
