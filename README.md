@@ -39,10 +39,14 @@ Rules — identical on `main` and `dev`:
 | PR base | feature → `dev`; promotion → `main` (from `dev` only) |
 | Required check | `verify` (CI green before merge) |
 | Merge method | squash merge, one commit per PR |
-| Branch after merge | deleted automatically |
+| Branch after merge | feature branches deleted after merge; `dev` is never deleted |
 | Force-push / branch deletion | disabled on both protected branches |
 | History | linear, conversation resolution required |
 | Required reviews | 0 while the team is one person; raise to 1 when a second committer joins |
+
+> Repository setting `delete_branch_on_merge` is **off** on purpose: the promotion PR's head is
+> `dev`, so an automatic delete would destroy the integration branch. Feature branches are deleted
+> explicitly when their PR is merged (`gh pr merge --squash --delete-branch`).
 
 Promotion is a deliberate step, never a fast-forward: when `dev` is verified on the test site, open
 a PR from `dev` into `main`, let `verify` run again, squash-merge, then tag `vX.Y.Z` from `main`.
@@ -80,6 +84,8 @@ fed directly from the Actions artifact:
 - URL: https://mizuthethird-arch.github.io/aster-ik/
 - Trigger: `push` to `dev` only; `main` and pull requests build but never deploy
 - Build base path: `VITE_BASE=/aster-ik/` (Pages serves the repo under a subpath)
+- The `github-pages` environment has a custom branch policy allowing only `main` and `dev`; any
+  other branch that tries to deploy fails at the deploy step until it is added to that policy.
 
 Pull requests get no preview URL: GitHub Pages publishes one site per repository. This site is the
 integration test surface; it mirrors `dev`, not production.
