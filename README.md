@@ -15,28 +15,46 @@ workspace — no Node, pnpm or Vite on the host. See [frontend/README.md](fronte
 
 ## Branch strategy
 
-`main` is the only long-lived branch. It is protected, always green, and always deployable.
+Two long-lived branches and one promotion path. Work always flows left to right:
+
+```
+<type>/<slug>  ──PR──▶  dev  ──PR──▶  main
+   feature work        integration        production
+```
+
+| Branch | Role | Published to |
+|--------|------|--------------|
+| `main` | production. Only ever receives merges from `dev`. | self-hosted production (later) |
+| `dev` | integration. Where feature PRs land; all features are tested together here. | GitHub Pages test site |
+| `<type>/<slug>` | short-lived work, cut from `dev`, merged back into `dev`. | nothing |
+
+Type ∈ `feat`, `fix`, `chore`, `ci`, `docs`, `refactor`; slug is kebab-case:
+`feat/login-form`, `fix/dev-server-port`, `ci/pages-test-deploy`, `docs/branch-strategy`.
+
+Rules — identical on `main` and `dev`:
 
 | Rule | Value |
 |------|-------|
-| Direct pushes to `main` | not allowed — every change arrives through a PR |
-| Branch naming | `<type>/<slug>`, type ∈ `feat`, `fix`, `chore`, `ci`, `docs`, `refactor` |
-| Branch lifetime | short-lived; delete after merge |
-| Required check | `verify` (CI must be green before merge) |
+| Direct pushes | not allowed on `main` or `dev` — every change arrives through a PR |
+| PR base | feature → `dev`; promotion → `main` (from `dev` only) |
+| Required check | `verify` (CI green before merge) |
 | Merge method | squash merge, one commit per PR |
-| Force-push / branch deletion | disabled on `main` |
+| Branch after merge | deleted automatically |
+| Force-push / branch deletion | disabled on both protected branches |
+| History | linear, conversation resolution required |
 | Required reviews | 0 while the team is one person; raise to 1 when a second committer joins |
 
-Examples: `feat/login-form`, `fix/dev-server-port`, `ci/preview-deploy`, `docs/branch-strategy`.
+Promotion is a deliberate step, never a fast-forward: when `dev` is verified on the test site, open
+a PR from `dev` into `main`, let `verify` run again, squash-merge, then tag `vX.Y.Z` from `main`.
+
+A hotfix follows the same path — `fix/<slug>` → `dev` → `main`. Nothing skips the promotion PR.
 
 Commit subjects follow Conventional Commits (`feat:`, `fix:`, `chore:`, `ci:`, `docs:`), one
 logical change per commit.
 
-Release tags (`vX.Y.Z`) are cut from `main` at deploy time, never from a feature branch.
-
 ## CI
 
-`.github/workflows/ci.yml` runs on every push to `main` and every PR targeting `main`:
+`.github/workflows/ci.yml` runs on every push to `main` and `dev`, and every PR targeting them:
 
 | Step | Command (in `frontend/`) |
 |------|--------------------------|
@@ -56,15 +74,15 @@ docker compose run --rm frontend sh -lc 'pnpm install --frozen-lockfile && pnpm 
 
 ## Test deploy (GitHub Pages)
 
-Every merge to `main` publishes the built app to GitHub Pages — no `gh-pages` branch, Pages is
+Every merge to **`dev`** publishes the built app to GitHub Pages — no `gh-pages` branch, Pages is
 fed directly from the Actions artifact:
 
 - URL: https://mizuthethird-arch.github.io/aster-ik/
-- Trigger: `push` to `main` only; pull requests build but never deploy
+- Trigger: `push` to `dev` only; `main` and pull requests build but never deploy
 - Build base path: `VITE_BASE=/aster-ik/` (Pages serves the repo under a subpath)
 
-Pull requests get no preview URL: GitHub Pages publishes one site per repository. Production will
-be self-hosted later — GitHub Pages is the test surface only.
+Pull requests get no preview URL: GitHub Pages publishes one site per repository. This site is the
+integration test surface; it mirrors `dev`, not production.
 
 ## Security
 
