@@ -1,0 +1,353 @@
+/* ==========================================================================
+   aster-ik — design tokens (F1)
+   The single source of truth for colour, type, spacing, radii, elevation and
+   motion. Dark is the default theme; <html data-theme="light"> swaps only the
+   semantic layer. Components must use the generated token classes — no raw
+   hex, no magic pixels.
+   ========================================================================== */
+
+/* --- Raw values. The only place a literal colour or size is written. ------ */
+
+:root {
+  color-scheme: dark;
+
+  /* Tailwind resolves bare spacing utilities against this unit, so an
+     off-scale number still lands on a whole pixel instead of an invalid
+     value. The explicit scale below is the supported set. */
+  --spacing: 1px;
+
+  /* Brand layer — brand guidelines §3. Identical in both themes. */
+  --aster-ik-brand-ink: #161616;
+  --aster-ik-brand-paper: #f7f7f5;
+  --aster-ik-brand-iris: #6a5cff;
+  --aster-ik-brand-aqua: #2cd4c4;
+
+  /* Semantic surfaces and text — dark (the default theme). */
+  --aster-ik-bg: #09090b;
+  --aster-ik-card: #0e0e11;
+  --aster-ik-subtle: #18181b;
+  --aster-ik-border: #27272a;
+  --aster-ik-fg: #fafafa;
+  --aster-ik-muted: #a1a1aa;
+  --aster-ik-inv: #fafafa;
+  --aster-ik-inv-fg: #09090b;
+  --aster-ik-header: rgb(9 9 11 / 0.78);
+  --aster-ik-grid: rgb(255 255 255 / 0.06);
+  --aster-ik-glow: rgb(161 161 170 / 0.22);
+
+  /* Status — the same in both themes. danger-text and success-text fail
+     contrast in light; kept exact from the source and flagged in the demo. */
+  --aster-ik-danger: #dc2626;
+  --aster-ik-on-danger: #ffffff;
+  --aster-ik-danger-soft: rgb(220 38 38 / 0.14);
+  --aster-ik-danger-text: #ef4444;
+  --aster-ik-success-soft: rgb(34 197 94 / 0.14);
+  --aster-ik-success-text: #22c55e;
+
+  /* Theme accents. Fills are theme-independent; text variants are not. */
+  --aster-ik-accent-blue: #2563eb;
+  --aster-ik-accent-violet: #7c3aed;
+  --aster-ik-accent-rose: #e11d48;
+  --aster-ik-accent-green: #16a34a;
+  --aster-ik-accent-amber: #f59e0b;
+  --aster-ik-on-accent-amber: #09090b;
+
+  /* Code highlighting — dark. */
+  --aster-ik-code-keyword: #c4b5fd;
+  --aster-ik-code-string: #86efac;
+
+  /* Elevation — the one shadow. */
+  --aster-ik-shadow-float:
+    0 1px 0 rgb(255 255 255 / 0.04) inset, 0 20px 40px -20px rgb(0 0 0 / 0.8);
+
+  /* Motion. */
+  --aster-ik-motion-fast: 150ms;
+  --aster-ik-motion-medium: 200ms;
+  --aster-ik-motion-slow: 300ms;
+  --aster-ik-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Accent text variants — dark. */
+  --aster-ik-accent-blue-text: #60a5fa;
+  --aster-ik-accent-violet-text: #a78bfa;
+  --aster-ik-accent-rose-text: #fb7185;
+  --aster-ik-accent-green-text: #4ade80;
+  --aster-ik-accent-amber-text: #fbbf24;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  --aster-ik-bg: #ffffff;
+  --aster-ik-card: #ffffff;
+  --aster-ik-subtle: #f4f4f5;
+  --aster-ik-border: #e4e4e7;
+  --aster-ik-fg: #09090b;
+  --aster-ik-muted: #71717a;
+  --aster-ik-inv: #18181b;
+  --aster-ik-inv-fg: #fafafa;
+  --aster-ik-header: rgb(255 255 255 / 0.8);
+  --aster-ik-grid: rgb(9 9 11 / 0.06);
+  --aster-ik-glow: rgb(113 113 122 / 0.16);
+
+  --aster-ik-code-keyword: #7c3aed;
+  --aster-ik-code-string: #15803d;
+
+  --aster-ik-shadow-float: 0 20px 40px -24px rgb(9 9 11 / 0.25);
+
+  --aster-ik-accent-blue-text: #2563eb;
+  --aster-ik-accent-violet-text: #7c3aed;
+  --aster-ik-accent-rose-text: #e11d48;
+  --aster-ik-accent-green-text: #16a34a;
+  --aster-ik-accent-amber-text: #f59e0b;
+}
+
+/* --- Tailwind theme: token names become utilities ------------------------ */
+
+/* The default palette is cleared so only aster-ik tokens can be used. */
+@theme {
+  --color-*: initial;
+}
+
+@theme inline {
+  /* Surfaces and text */
+  --color-bg: var(--aster-ik-bg);
+  --color-card: var(--aster-ik-card);
+  --color-subtle: var(--aster-ik-subtle);
+  --color-border: var(--aster-ik-border);
+  --color-fg: var(--aster-ik-fg);
+  --color-muted: var(--aster-ik-muted);
+  --color-inv: var(--aster-ik-inv);
+  --color-inv-fg: var(--aster-ik-inv-fg);
+  --color-header: var(--aster-ik-header);
+  --color-grid: var(--aster-ik-grid);
+  --color-glow: var(--aster-ik-glow);
+
+  /* Brand layer — never inside components. */
+  --color-brand-ink: var(--aster-ik-brand-ink);
+  --color-brand-paper: var(--aster-ik-brand-paper);
+  --color-brand-iris: var(--aster-ik-brand-iris);
+  --color-brand-aqua: var(--aster-ik-brand-aqua);
+
+  /* Status */
+  --color-danger: var(--aster-ik-danger);
+  --color-on-danger: var(--aster-ik-on-danger);
+  --color-danger-soft: var(--aster-ik-danger-soft);
+  --color-danger-text: var(--aster-ik-danger-text);
+  --color-success-soft: var(--aster-ik-success-soft);
+  --color-success-text: var(--aster-ik-success-text);
+
+  /* Theme accents */
+  --color-accent-blue: var(--aster-ik-accent-blue);
+  --color-accent-blue-text: var(--aster-ik-accent-blue-text);
+  --color-accent-violet: var(--aster-ik-accent-violet);
+  --color-accent-violet-text: var(--aster-ik-accent-violet-text);
+  --color-accent-rose: var(--aster-ik-accent-rose);
+  --color-accent-rose-text: var(--aster-ik-accent-rose-text);
+  --color-accent-green: var(--aster-ik-accent-green);
+  --color-accent-green-text: var(--aster-ik-accent-green-text);
+  --color-accent-amber: var(--aster-ik-accent-amber);
+  --color-accent-amber-text: var(--aster-ik-accent-amber-text);
+  --color-on-accent-amber: var(--aster-ik-on-accent-amber);
+
+  /* Code highlighting */
+  --color-code-keyword: var(--aster-ik-code-keyword);
+  --color-code-string: var(--aster-ik-code-string);
+
+  /* Elevation */
+  --shadow-float: var(--aster-ik-shadow-float);
+}
+
+@theme {
+  /* Families — brand guidelines §4 */
+  --font-sans: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+  --font-wordmark: 'Sora', 'Geist', system-ui, sans-serif;
+
+  /* Type scale. Each token carries its line-height, weight and tracking. */
+  --text-display-xl: 76px;
+  --text-display-xl--line-height: 1.02;
+  --text-display-xl--font-weight: 600;
+  --text-display-xl--letter-spacing: -0.05em;
+  --text-display-lg: 56px;
+  --text-display-lg--line-height: 1.02;
+  --text-display-lg--font-weight: 600;
+  --text-display-lg--letter-spacing: -0.05em;
+  --text-display-sm: 40px;
+  --text-display-sm--line-height: 1.02;
+  --text-display-sm--font-weight: 600;
+  --text-display-sm--letter-spacing: -0.05em;
+  --text-cta-title: clamp(30px, 6vw, 52px);
+  --text-cta-title--line-height: 1.05;
+  --text-cta-title--font-weight: 600;
+  --text-cta-title--letter-spacing: -0.045em;
+  --text-heading-lg: 42px;
+  --text-heading-lg--line-height: 1.1;
+  --text-heading-lg--font-weight: 600;
+  --text-heading-lg--letter-spacing: -0.035em;
+  --text-heading-md: 30px;
+  --text-heading-md--line-height: 1.1;
+  --text-heading-md--font-weight: 600;
+  --text-heading-md--letter-spacing: -0.035em;
+  --text-lead: 17px;
+  --text-lead--line-height: 1.6;
+  --text-lead--font-weight: 400;
+  --text-lead-sm: 16px;
+  --text-lead-sm--line-height: 1.6;
+  --text-lead-sm--font-weight: 400;
+  --text-title: 16px;
+  --text-title--line-height: 1.5;
+  --text-title--font-weight: 600;
+  --text-title--letter-spacing: -0.01em;
+  --text-body: 14px;
+  --text-body--line-height: 1.5;
+  --text-body--font-weight: 400;
+  --text-body-medium: 14px;
+  --text-body-medium--line-height: 1.5;
+  --text-body-medium--font-weight: 500;
+  --text-label: 13px;
+  --text-label--line-height: 1.5;
+  --text-label--font-weight: 500;
+  --text-small: 13px;
+  --text-small--line-height: 1.5;
+  --text-small--font-weight: 400;
+  --text-caption: 12px;
+  --text-caption--line-height: 1.5;
+  --text-caption--font-weight: 400;
+  --text-micro: 11px;
+  --text-micro--line-height: 1.4;
+  --text-micro--font-weight: 400;
+  --text-micro--letter-spacing: 0.06em;
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 1.5;
+  --text-eyebrow--font-weight: 400;
+  --text-eyebrow--letter-spacing: 0.08em;
+  --text-code: 13px;
+  --text-code--line-height: 1.75;
+  --text-code--font-weight: 400;
+  --text-command: 14px;
+  --text-command--line-height: 1.5;
+  --text-command--font-weight: 400;
+  --text-kbd: 11px;
+  --text-kbd--line-height: 1.4;
+  --text-kbd--font-weight: 500;
+  --text-wordmark: 19px;
+  --text-wordmark--line-height: 1;
+  --text-wordmark--font-weight: 800;
+  --text-wordmark--letter-spacing: -0.05em;
+
+  /* Spacing — brand guidelines §5. The base unit is 1px, so the scale is in
+     pixels and every numeric step is explicit: p-16 is 16px, py-72 is 72px. */
+  --spacing: 1px;
+  --spacing-2: 2px;
+  --spacing-4: 4px;
+  --spacing-6: 6px;
+  --spacing-8: 8px;
+  --spacing-10: 10px;
+  --spacing-12: 12px;
+  --spacing-14: 14px;
+  --spacing-16: 16px;
+  --spacing-20: 20px;
+  --spacing-22: 22px;
+  --spacing-24: 24px;
+  --spacing-32: 32px;
+  --spacing-40: 40px;
+  --spacing-56: 56px;
+  --spacing-64: 64px;
+  --spacing-72: 72px;
+  --spacing-96: 96px;
+  --spacing-112: 112px;
+
+  /* Layout sizes, exposed as spacing utilities: h-header, h-control, … */
+  --spacing-header: 60px;
+  --spacing-control: 40px;
+  --spacing-control-sm: 32px;
+  --spacing-control-icon: 36px;
+  --spacing-control-cta: 44px;
+  --spacing-input: 38px;
+  --spacing-grid-pitch: 44px;
+
+  --container-page: 1200px;
+  --container-lead: 560px;
+  --container-intro: 600px;
+
+  /* Breakpoints — brand guidelines §5 */
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+
+  /* Radii — brand guidelines §6 */
+  --radius-xs: 3px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-input: 9px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+  --radius-mark: 25%;
+
+  /* The sticky header's backdrop blur. */
+  --blur-header: 12px;
+}
+
+/* --- Base layer --------------------------------------------------------- */
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: var(--aster-ik-bg);
+  }
+
+  body {
+    background-color: var(--aster-ik-bg);
+    color: var(--aster-ik-fg);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: var(--text-body--font-weight);
+  }
+
+  /* Focus is a 2px fg ring with a 2px offset, in both themes. */
+  :focus-visible {
+    outline: 2px solid var(--aster-ik-fg);
+    outline-offset: 2px;
+  }
+
+  /* Motion is short and functional; remove it entirely when asked. */
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --aster-ik-motion-fast: 0ms;
+      --aster-ik-motion-medium: 0ms;
+      --aster-ik-motion-slow: 0ms;
+    }
+  }
+}
+
+/* --- Token-composed utilities ------------------------------------------- */
+
+/* Hero grid: 44px pitch, faded by a radial mask. Decoration only. */
+@utility bg-hero-grid {
+  background-image:
+    linear-gradient(to right, var(--aster-ik-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--aster-ik-grid) 1px, transparent 1px);
+  background-size: var(--spacing-grid-pitch) var(--spacing-grid-pitch);
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
+  mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, black, transparent);
+}
+
+/* Hero glow: one soft radial per page. Decoration only. */
+@utility bg-hero-glow {
+  background-image: radial-gradient(
+    ellipse 55% 45% at 50% 0%,
+    var(--aster-ik-glow),
+    transparent 70%
+  );
+}
+
+/* Shared transition for colour, fill and border changes. */
+@utility transition-ui {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+  transition-duration: var(--aster-ik-motion-fast);
+  transition-timing-function: var(--aster-ik-ease);
+}
