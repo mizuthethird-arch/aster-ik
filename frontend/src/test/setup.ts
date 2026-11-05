@@ -9,6 +9,7 @@ afterEach(() => {
   cleanup()
   resetMatchMedia()
   document.documentElement.removeAttribute('data-theme')
+  document.documentElement.removeAttribute('data-scroll-locked')
 })
 
 /*

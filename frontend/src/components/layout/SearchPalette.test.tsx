@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
@@ -155,6 +155,38 @@ describe('SearchPalette', () => {
     await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
   })
 
+  it('locks the page scroll while the dialog is open', async () => {
+    const user = userEvent.setup()
+    renderInteractivePalette()
+
+    expect(document.documentElement).toHaveAttribute('data-scroll-locked')
+
+    await user.click(screen.getByRole('link', { name: /^Typography:/ }))
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
+
+    expect(document.documentElement).not.toHaveAttribute('data-scroll-locked')
+  })
+
+  it('keeps the results area at one fixed height in every state', async () => {
+    const user = userEvent.setup()
+    renderPalette()
+    const region = () => document.querySelector('dialog .h-dialog-list') as HTMLElement | null
+
+    expect(region()).toBeInTheDocument()
+    expect(region()).toHaveClass('overflow-y-auto', 'scroll-gutter-stable')
+    expect(within(region()!).getAllByRole('link')).toHaveLength(6)
+
+    await user.type(screen.getByRole('searchbox'), 'zzz')
+
+    expect(region()).toBeInTheDocument()
+    expect(within(region()!).getByText(/No sections match/)).toBeInTheDocument()
+  })
+
+  it('rounds the search field so the focus ring follows the input radius', () => {
+    renderPalette()
+
+    expect(screen.getByRole('searchbox')).toHaveClass('rounded-input')
+  })
   it('closes instantly when motion is reduced', () => {
     setPrefersReducedMotion(true)
     const { rerenderPalette } = renderPalette(true)
@@ -195,6 +227,17 @@ describe('SearchPalette', () => {
     await waitFor(() => expect(dialogEl.open).toBe(false), { timeout: 3000 })
   })
 
+  it('closes on Escape even while the query field has text', async () => {
+    const user = userEvent.setup()
+    const { onClose } = renderInteractivePalette()
+    const input = screen.getByRole('searchbox')
+    await user.type(input, 'zzz')
+
+    fireEvent.keyDown(input, { key: 'Escape' })
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
+  })
   it('starts from an empty query each time it opens', async () => {
     const user = userEvent.setup()
     const { rerenderPalette } = renderPalette(true)
