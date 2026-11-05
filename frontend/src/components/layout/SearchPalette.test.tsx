@@ -62,11 +62,17 @@ describe('SearchPalette', () => {
     expect(dialog()).toHaveFocus()
   })
 
-  it('animates the field focus ring instead of snapping it on', () => {
+  it('shows a minimal focus border instead of a ring or a glow', () => {
     renderPalette()
 
     const input = screen.getByRole('searchbox')
-    expect(input).toHaveClass('field-focus', 'border', 'border-transparent')
+    expect(input).toHaveClass(
+      'border',
+      'border-border',
+      'focus-visible:border-fg',
+      'focus-visible:outline-none',
+    )
+    expect(input).not.toHaveClass('field-focus')
   })
   it('moves focus into the field on the first Tab', async () => {
     const user = userEvent.setup()

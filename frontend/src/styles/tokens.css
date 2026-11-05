@@ -37,8 +37,6 @@
   --aster-ik-header: rgb(9 9 11 / 0.78);
   --aster-ik-grid: rgb(255 255 255 / 0.06);
   --aster-ik-glow: rgb(161 161 170 / 0.22);
-  /* Soft halo around a focused field, on top of the 2px fg ring. */
-  --aster-ik-focus-glow: rgb(250 250 250 / 0.18);
 
   /* Status — the same in both themes. danger-text and success-text fail
      contrast in light; kept exact from the source and flagged in the demo. */
@@ -95,7 +93,6 @@
   --aster-ik-header: rgb(255 255 255 / 0.8);
   --aster-ik-grid: rgb(9 9 11 / 0.06);
   --aster-ik-glow: rgb(113 113 122 / 0.16);
-  --aster-ik-focus-glow: rgb(9 9 11 / 0.14);
 
   --aster-ik-code-keyword: #7c3aed;
   --aster-ik-code-string: #15803d;
@@ -423,32 +420,6 @@
     font-size: var(--text-input);
     line-height: var(--text-input--line-height);
     font-weight: var(--text-input--font-weight);
-  }
-}
-/* --- Focus treatment for text fields ------------------------------------ */
-
-/* The guideline focus ring (2px fg at a 2px offset) plus a soft halo, faded in
-   with the motion token instead of snapping on. Durations come from
-   --aster-ik-motion-* so prefers-reduced-motion makes it instant. */
-@utility field-focus {
-  /* Same layer structure at rest, transparent, so the halo interpolates
-     smoothly instead of snapping from `none`. */
-  box-shadow:
-    0 0 0 2px transparent,
-    0 0 0 4px transparent,
-    0 0 0 7px transparent;
-  transition:
-    box-shadow var(--aster-ik-motion-fast) var(--aster-ik-ease),
-    border-color var(--aster-ik-motion-fast) var(--aster-ik-ease),
-    background-color var(--aster-ik-motion-fast) var(--aster-ik-ease);
-
-  &:focus-visible {
-    outline: none;
-    border-color: var(--aster-ik-fg);
-    box-shadow:
-      0 0 0 2px var(--aster-ik-bg),
-      0 0 0 4px var(--aster-ik-fg),
-      0 0 0 7px var(--aster-ik-focus-glow);
   }
 }
 /* --- Reduced motion ------------------------------------------------------ */

@@ -50,7 +50,7 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search this page…"
           aria-label="Search this page"
-          className="field-focus h-control w-full rounded-input border border-transparent bg-transparent px-8 text-body text-fg placeholder:text-muted"
+          className="h-control w-full rounded-input border border-border bg-transparent px-8 text-body text-fg transition-ui placeholder:text-muted focus-visible:border-fg focus-visible:outline-none"
         />
       </div>
 
