@@ -80,7 +80,10 @@ describe('App shell', () => {
     render(<App />)
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Small surface. Solid foundations.' }),
+      screen.getByRole('heading', {
+        level: 1,
+        name: 'Components for the interfaces you build next.',
+      }),
     ).toBeInTheDocument()
     expect(screen.getByText('Quiet surfaces. One accent.')).toBeInTheDocument()
     expect(screen.getByText('Readable APIs. Predictable results.')).toBeInTheDocument()

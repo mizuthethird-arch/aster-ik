@@ -280,6 +280,8 @@
   --container-page: 1200px;
   --container-lead: 560px;
   --container-intro: 600px;
+  --container-install: 448px;
+  --container-headline: 900px;
 
   /* Breakpoints — brand guidelines §5 */
   --breakpoint-sm: 640px;
