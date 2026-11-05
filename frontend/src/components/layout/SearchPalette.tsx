@@ -29,18 +29,11 @@ function setScrollLock(locked: boolean) {
 }
 
 /*
- * The panel mounts per opening, so every search starts empty. Focus is moved by
- * the dialog (field on a fine pointer, the dialog itself on touch) rather than
- * by an autofocus attribute: the browser would otherwise focus the field on
- * modal open, which zooms and raises the keyboard on phones.
+ * The panel mounts per opening, so every search starts empty. Nothing focuses
+ * the field: the modal opens without autofocus, the way a sheet should, and the
+ * reader can Tab or tap into the field when they want to search.
  */
-function SearchPanel({
-  onClose,
-  inputRef,
-}: {
-  onClose: () => void
-  inputRef: React.RefObject<HTMLInputElement | null>
-}) {
+function SearchPanel({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
   const needle = query.trim().toLowerCase()
   const matches = sections.filter((section) =>
@@ -52,14 +45,12 @@ function SearchPanel({
       <div className="grid grid-cols-[auto_1fr] items-center gap-8 border-b border-border px-16 py-10">
         <SearchIcon className="size-16 text-muted" />
         <input
-          ref={inputRef}
           type="search"
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search this page…"
           aria-label="Search this page"
-          tabIndex={-1}
-          className="h-control w-full rounded-input bg-transparent px-8 text-body text-fg placeholder:text-muted"
+          className="h-control w-full rounded-input border border-border bg-transparent px-8 text-body text-fg transition-ui placeholder:text-muted focus-visible:border-fg focus-visible:outline-none"
         />
       </div>
 
@@ -94,15 +85,8 @@ function SearchPanel({
 
 export function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
   const closingRef = useRef(false)
   const reduceMotion = usePrefersReducedMotion()
-  /* Touch devices must not focus the field: it zooms the page and raises the
-     keyboard before the reader has asked to type. */
-  const [canFocusField] = useState(() => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true
-    return window.matchMedia('(pointer: fine)').matches
-  })
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -114,11 +98,10 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       dialog.close()
       setScrollLock(false)
     }
-    if (open) {
-      if (canFocusField) inputRef.current?.focus()
-      else dialog.focus()
-    }
-  }, [open, reduceMotion, canFocusField])
+    /* Keep focus inside the modal without focusing the field: the browser focuses
+       the first focusable descendant on showModal, so the dialog takes it back. */
+    if (open) dialog.focus()
+  }, [open, reduceMotion])
 
   /* Never leave the page locked if the palette unmounts mid-open. */
   useEffect(() => () => setScrollLock(false), [])
@@ -169,12 +152,12 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       onClick={handleDialogClick}
       aria-label="Search this page"
       tabIndex={-1}
-      className="m-auto w-full border-0 bg-transparent p-0 text-fg backdrop:bg-bg/80 sm:max-w-intro"
+      className="m-auto w-full border-0 bg-transparent p-0 text-fg outline-none backdrop:bg-bg/80 sm:max-w-intro"
     >
       {reduceMotion ? (
         open ? (
           <div className={panelClass}>
-            <SearchPanel onClose={onClose} inputRef={inputRef} />
+            <SearchPanel onClose={onClose} />
           </div>
         ) : null
       ) : (
@@ -188,7 +171,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
               exit="hidden"
               className={panelClass}
             >
-              <SearchPanel onClose={onClose} inputRef={inputRef} />
+              <SearchPanel onClose={onClose} />
             </m.div>
           ) : null}
         </AnimatePresence>

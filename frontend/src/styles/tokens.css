@@ -324,15 +324,6 @@
     outline: 2px solid var(--aster-ik-fg);
     outline-offset: 2px;
   }
-
-  /* Motion is short and functional; remove it entirely when asked. */
-  @media (prefers-reduced-motion: reduce) {
-    :root {
-      --aster-ik-motion-fast: 0ms;
-      --aster-ik-motion-medium: 0ms;
-      --aster-ik-motion-slow: 0ms;
-    }
-  }
 }
 
 /* --- Token-composed utilities ------------------------------------------- */
@@ -429,5 +420,17 @@
     font-size: var(--text-input);
     line-height: var(--text-input--line-height);
     font-weight: var(--text-input--font-weight);
+  }
+}
+/* --- Reduced motion ------------------------------------------------------ */
+
+/* Remove motion entirely when asked. Unlayered on purpose: the raw values live
+   in an unlayered `:root`, so an override inside @layer base would lose the
+   cascade and every CSS transition would still run. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --aster-ik-motion-fast: 0ms;
+    --aster-ik-motion-medium: 0ms;
+    --aster-ik-motion-slow: 0ms;
   }
 }
