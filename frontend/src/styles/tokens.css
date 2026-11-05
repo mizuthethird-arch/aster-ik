@@ -447,3 +447,14 @@
     linear(0, 0.22 10%, 0.55 25%, 0.83 42%, 0.96 58%, 1.015 72%, 1 100%);
   will-change: transform;
 }
+/* --- Blend labels over a moving selection surface ----------------------- */
+
+/* Labels sit above the sliding inverted pill with a pure-white colour and
+   `difference` blending: over the page they render light, over the pill dark —
+   per pixel, with no colour transition, so a moving pill never leaves a blank
+   surface or a washed-out label behind. Pure white is required for the blend
+   maths; the rendered colour always comes from the backdrop. */
+@utility blend-label {
+  color: #fff;
+  mix-blend-mode: difference;
+}

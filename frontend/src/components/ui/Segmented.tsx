@@ -10,9 +10,16 @@ type SegmentedProps<T extends string> = {
 }
 
 /*
- * Pressed-button group for view switches (auth method, chart range). One shared
- * inverted pill slides between the options, so the surface moves instead of two
- * backgrounds swapping; the active label flips to inverted-fg text.
+ * Pressed-button group for view switches (auth method, chart range).
+ *
+ * One inverted pill slides between the options instead of two backgrounds
+ * swapping. The labels are painted in a separate, pointer-transparent layer
+ * above the pill with `difference` blending (`.blend-label`): over the page they
+ * render light, over the pill dark — per pixel, with no colour transition. That
+ * keeps them legible while the pill travels, instead of crossfading to white on
+ * the white pill (which read as a blank rounded surface mid-slide). The buttons
+ * themselves keep their text transparent so the accessible name stays intact
+ * while the visible copy lives in the blended layer.
  */
 export function Segmented<T extends string>({
   label,
@@ -27,15 +34,29 @@ export function Segmented<T extends string>({
     options.findIndex((option) => option.value === value),
   )
 
+  const columns = `repeat(${options.length}, minmax(0, 1fr))`
+
   return (
     <div
       role="group"
       aria-label={label}
-      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
-      className={`relative items-center rounded-md border border-border bg-bg p-6 ${
+      style={{ gridTemplateColumns: columns }}
+      className={`relative isolate items-center rounded-md border border-border bg-bg p-6 ${
         fill ? 'grid w-full' : 'inline-grid'
       } ${className}`}
     >
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          aria-pressed={option.value === value}
+          onClick={() => onChange(option.value)}
+          className="relative h-control-sm rounded-sm px-10 text-label text-transparent transition-ui hover:bg-subtle"
+        >
+          {option.label}
+        </button>
+      ))}
+
       <span
         aria-hidden="true"
         data-segmented-indicator=""
@@ -46,23 +67,17 @@ export function Segmented<T extends string>({
         }}
       />
 
-      {options.map((option) => {
-        const active = option.value === value
-
-        return (
-          <button
-            key={option.value}
-            type="button"
-            aria-pressed={active}
-            onClick={() => onChange(option.value)}
-            className={`relative z-10 h-control-sm rounded-sm px-10 text-label transition-ui ${
-              active ? 'text-inv-fg' : 'text-fg hover:bg-subtle'
-            }`}
-          >
+      <div
+        aria-hidden="true"
+        style={{ gridTemplateColumns: columns }}
+        className="pointer-events-none absolute inset-6 grid items-center"
+      >
+        {options.map((option) => (
+          <span key={option.value} className="blend-label px-10 text-center text-label">
             {option.label}
-          </button>
-        )
-      })}
+          </span>
+        ))}
+      </div>
     </div>
   )
 }

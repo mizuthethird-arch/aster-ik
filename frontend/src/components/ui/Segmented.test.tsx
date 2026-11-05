@@ -40,11 +40,14 @@ describe('Segmented', () => {
     ).toBe('translateX(100%)')
   })
 
-  it('marks the active option pressed and inverts it', () => {
+  it('marks the active option pressed and keeps labels blended over the moving pill', () => {
     render(<Harness />)
 
     expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'true')
-    expect(screen.getByRole('button', { name: 'A' })).toHaveClass('text-inv-fg')
-    expect(screen.getByRole('button', { name: 'B' })).toHaveClass('text-fg')
+
+    const { container } = render(<Harness />)
+    const labels = container.querySelectorAll('.blend-label')
+    expect(labels).toHaveLength(2)
+    expect(labels[0]).toHaveClass('blend-label')
   })
 })
