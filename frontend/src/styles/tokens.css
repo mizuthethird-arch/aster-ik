@@ -269,6 +269,7 @@
   --spacing-control-icon: 36px;
   --spacing-control-cta: 44px;
   --spacing-input: 38px;
+  --spacing-dialog-list: 344px;
   --spacing-grid-pitch: 44px;
 
   --container-page: 1200px;
@@ -367,4 +368,47 @@
 
 ::view-transition-new(root) {
   z-index: 1;
+}
+/* --- Scrollers are part of the design ----------------------------------- */
+
+@layer base {
+  /* Reserve the gutter so locking the page (or a list starting to scroll)
+     never shifts the layout. */
+  html {
+    scrollbar-gutter: stable;
+  }
+
+  html[data-scroll-locked] {
+    overflow: hidden;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--aster-ik-border) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--aster-ik-border);
+    border: 2px solid transparent;
+    border-radius: 9999px;
+    background-clip: content-box;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--aster-ik-muted);
+  }
+}
+
+/* A scroll region that never reflows its contents when the scrollbar appears. */
+@utility scroll-gutter-stable {
+  scrollbar-gutter: stable;
 }

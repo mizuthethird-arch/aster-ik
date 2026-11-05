@@ -16,6 +16,11 @@ export const menuExitTransition = {
   ease: [0.4, 0, 1, 1] as [number, number, number, number],
 }
 export const menuIconTransition = { duration: 0.22, ease: appleEase }
+export const dialogTransition = { duration: 0.24, ease: appleEase }
+export const dialogExitTransition = {
+  duration: 0.18,
+  ease: [0.4, 0, 1, 1] as [number, number, number, number],
+}
 export const themeRevealTransition = { duration: 0.55, ease: appleEase }
 export const iconSpring = { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.7 }
 
