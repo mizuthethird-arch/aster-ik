@@ -12,6 +12,7 @@ type Listener = (event: MediaQueryListEvent) => void
 
 const listeners = new Set<Listener>()
 let prefersReducedMotion = false
+let coarsePointer = false
 
 export function setPrefersReducedMotion(value: boolean) {
   prefersReducedMotion = value
@@ -19,17 +20,30 @@ export function setPrefersReducedMotion(value: boolean) {
   listeners.forEach((listener) => listener(event))
 }
 
+export function setCoarsePointer(value: boolean) {
+  coarsePointer = value
+}
+
 export function resetMatchMedia() {
   prefersReducedMotion = false
+  coarsePointer = false
   listeners.clear()
 }
 
 export function installMatchMediaMock() {
   window.matchMedia = ((query: string): MediaQueryList => {
     const isReducedMotion = query.includes('prefers-reduced-motion')
+    const isFinePointer = query.includes('pointer: fine')
+    const isCoarsePointer = query.includes('pointer: coarse')
 
     return {
-      matches: isReducedMotion ? prefersReducedMotion : false,
+      matches: isReducedMotion
+        ? prefersReducedMotion
+        : isFinePointer
+          ? !coarsePointer
+          : isCoarsePointer
+            ? coarsePointer
+            : false,
       media: query,
       onchange: null,
       addEventListener: (_type: string, listener: EventListenerOrEventListenerObject | null) => {
