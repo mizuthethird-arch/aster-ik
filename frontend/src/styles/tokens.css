@@ -356,3 +356,15 @@
   transition-duration: var(--aster-ik-motion-fast);
   transition-timing-function: var(--aster-ik-ease);
 }
+/* Theme change: the next snapshot is revealed by a circle growing out of the
+   toggle (see src/motion/theme-reveal.ts). The default crossfade is disabled so
+   the clip is the only transition. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(root) {
+  z-index: 1;
+}

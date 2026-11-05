@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
-import { m } from 'motion/react'
+import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 
 import { Header } from './components/layout/Header'
-import { themeTransition } from './motion/config'
 import { MotionProvider } from './motion/MotionProvider'
+import { startThemeReveal } from './motion/theme-reveal'
+import type { RevealOrigin } from './motion/theme-reveal'
 import { usePrefersReducedMotion } from './motion/use-prefers-reduced-motion'
 
 /*
@@ -368,8 +369,6 @@ function TokenRows({ rows }: { rows: { name: string; note: string }[] }) {
 
 function App() {
   const [theme, setTheme] = useState<Theme>('dark')
-  const [veil, setVeil] = useState<{ color: string; id: number } | null>(null)
-  const veilId = useRef(0)
   const reduceMotion = usePrefersReducedMotion()
 
   useEffect(() => {
@@ -378,15 +377,13 @@ function App() {
     else root.removeAttribute('data-theme')
   }, [theme])
 
-  const toggleTheme = () => {
-    /* Paint the surface being left, then fade it away over the new theme: a
-       crossfade read from the token, never a hardcoded colour. */
-    const previousSurface = getComputedStyle(document.documentElement)
-      .getPropertyValue('--aster-ik-bg')
-      .trim()
-    veilId.current += 1
-    setVeil({ color: previousSurface, id: veilId.current })
-    setTheme((current) => (current === 'dark' ? 'light' : 'dark'))
+  const toggleTheme = (origin: RevealOrigin) => {
+    /* The next theme is revealed by a circle growing out of the toggle. */
+    startThemeReveal(
+      () => flushSync(() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))),
+      origin,
+      reduceMotion,
+    )
   }
 
   return (
@@ -556,20 +553,6 @@ function App() {
             Token specimen · aster-ik · dark is the default theme
           </div>
         </footer>
-
-        {!reduceMotion && veil ? (
-          <m.div
-            key={veil.id}
-            data-testid="theme-veil"
-            aria-hidden="true"
-            className="pointer-events-none fixed inset-0 z-20"
-            style={{ backgroundColor: veil.color }}
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={themeTransition}
-            onAnimationComplete={() => setVeil(null)}
-          />
-        ) : null}
       </div>
     </MotionProvider>
   )

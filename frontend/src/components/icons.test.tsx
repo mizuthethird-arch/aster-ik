@@ -1,13 +1,11 @@
 import { render } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
-import { CloseIcon, GitHubIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
+import { GitHubIcon, MoonIcon, SearchIcon, SunIcon } from './icons'
 
 const lineIcons = [
   ['search', SearchIcon],
   ['sun', SunIcon],
   ['moon', MoonIcon],
-  ['menu', MenuIcon],
-  ['close', CloseIcon],
 ] as const
 
 describe('icons', () => {

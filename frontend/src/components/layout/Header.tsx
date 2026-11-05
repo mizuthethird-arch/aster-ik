@@ -1,10 +1,17 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, m } from 'motion/react'
 import type { Variants } from 'motion/react'
-import { iconSpring, menuExitTransition, menuTransition } from '../../motion/config'
+import {
+  iconSpring,
+  menuExitTransition,
+  menuIconLines,
+  menuIconTransition,
+  menuTransition,
+} from '../../motion/config'
+import type { RevealOrigin } from '../../motion/theme-reveal'
 import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { Mark } from '../brand/Mark'
-import { CloseIcon, GitHubIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from '../icons'
+import { GitHubIcon, MoonIcon, SearchIcon, SunIcon } from '../icons'
 import { SearchPalette } from './SearchPalette'
 
 type Theme = 'dark' | 'light'
@@ -28,6 +35,9 @@ const menuVariants: Variants = {
 }
 
 const menuClass = 'grid gap-2 overflow-hidden border-t border-border px-16 pt-8 pb-16 md:hidden'
+
+/* Two lines that morph into the X; transform-box keeps the origin at the line. */
+const lineStyle = { transformBox: 'fill-box', transformOrigin: 'center' } as const
 
 function MobileMenuContent({
   onNavigate,
@@ -60,7 +70,13 @@ function MobileMenuContent({
   )
 }
 
-export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
+export function Header({
+  theme,
+  onToggleTheme,
+}: {
+  theme: Theme
+  onToggleTheme: (origin: RevealOrigin) => void
+}) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
   const reduceMotion = usePrefersReducedMotion()
@@ -155,7 +171,10 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
 
           <button
             type="button"
-            onClick={onToggleTheme}
+            onClick={(event) => {
+              const rect = event.currentTarget.getBoundingClientRect()
+              onToggleTheme({ x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 })
+            }}
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             className={`grid ${iconButton}`}
           >
@@ -185,7 +204,37 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
             onClick={() => setMenuOpen((open) => !open)}
             className={`grid md:hidden ${iconButton}`}
           >
-            {menuOpen ? <CloseIcon className="size-20" /> : <MenuIcon className="size-20" />}
+            <svg
+              viewBox="0 0 24 24"
+              className="size-20"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <m.line
+                x1="4"
+                y1="9"
+                x2="20"
+                y2="9"
+                style={lineStyle}
+                initial={false}
+                animate={menuOpen ? menuIconLines.top.open : menuIconLines.top.closed}
+                transition={menuIconTransition}
+              />
+              <m.line
+                x1="4"
+                y1="15"
+                x2="20"
+                y2="15"
+                style={lineStyle}
+                initial={false}
+                animate={menuOpen ? menuIconLines.bottom.open : menuIconLines.bottom.closed}
+                transition={menuIconTransition}
+              />
+            </svg>
           </button>
         </div>
       </div>

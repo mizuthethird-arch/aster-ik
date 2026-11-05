@@ -3,8 +3,10 @@ import {
   appleEase,
   iconSpring,
   menuExitTransition,
+  menuIconLines,
+  menuIconTransition,
   menuTransition,
-  themeTransition,
+  themeRevealTransition,
 } from './config'
 
 const asNumbers = (ease: readonly number[]) => [...ease]
@@ -22,11 +24,16 @@ describe('motion config', () => {
     expect(appleEase[1]).toBeGreaterThan(appleEase[0])
   })
 
-  it('keeps every duration in the 150–400ms band', () => {
-    for (const transition of [menuTransition, menuExitTransition, themeTransition]) {
+  it('keeps the menu durations in the 150–400ms band', () => {
+    for (const transition of [menuTransition, menuExitTransition, menuIconTransition]) {
       expect(transition.duration).toBeGreaterThanOrEqual(0.15)
       expect(transition.duration).toBeLessThanOrEqual(0.4)
     }
+  })
+
+  it('gives the theme reveal a longer, still brief duration', () => {
+    expect(themeRevealTransition.duration).toBeGreaterThanOrEqual(0.4)
+    expect(themeRevealTransition.duration).toBeLessThanOrEqual(0.7)
   })
 
   it('exits faster than it enters', () => {
@@ -37,5 +44,12 @@ describe('motion config', () => {
     expect(iconSpring.type).toBe('spring')
     expect(iconSpring.stiffness).toBeGreaterThan(0)
     expect(iconSpring.damping).toBeGreaterThan(0)
+  })
+
+  it('morphs the menu button lines instead of swapping icons', () => {
+    expect(menuIconLines.top.closed).toEqual({ rotate: 0, y: 0 })
+    expect(menuIconLines.top.open).toEqual({ rotate: 45, y: 3 })
+    expect(menuIconLines.bottom.closed).toEqual({ rotate: 0, y: 0 })
+    expect(menuIconLines.bottom.open).toEqual({ rotate: -45, y: -3 })
   })
 })
