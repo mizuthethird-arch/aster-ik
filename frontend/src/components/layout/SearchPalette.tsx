@@ -62,6 +62,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
           <li key={section.href}>
             <a
               href={section.href}
+              aria-label={`${section.label}: ${section.note}`}
               onClick={onClose}
               className="grid gap-2 rounded-md px-8 py-8 transition-ui hover:bg-subtle"
             >

@@ -73,6 +73,15 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
           <button
             type="button"
             onClick={() => setPaletteOpen(true)}
+            aria-label="Search docs"
+            className={`hidden md:grid lg:hidden ${iconButton}`}
+          >
+            <SearchIcon className="size-20" />
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setPaletteOpen(true)}
             className="hidden h-control grid-flow-col auto-cols-max items-center gap-8 rounded-lg border border-border bg-card px-12 text-body text-muted transition-ui hover:bg-subtle lg:grid"
           >
             <SearchIcon className="size-16" />
