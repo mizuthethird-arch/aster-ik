@@ -1,6 +1,6 @@
 import { AnimatePresence, m } from 'motion/react'
-import { useState } from 'react'
-import { fieldSwapVariants } from '../../motion/config'
+import { useEffect, useState } from 'react'
+import { fieldSwapVariants, successCelebrateMs, successLoadingMs } from '../../motion/config'
 import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
@@ -10,6 +10,7 @@ import { Segmented } from '../ui/Segmented'
 
 type Mode = 'password' | 'magic'
 type Celebration = 'lock' | 'plane'
+type Phase = 'form' | 'celebrate' | 'loading'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -18,17 +19,65 @@ const modeOptions = [
   { value: 'magic', label: 'Magic link' },
 ] as const
 
+const loadingCopy: Record<Mode, string> = {
+  password: 'Preparing your workspace…',
+  magic: 'Sending your link…',
+}
+
+function LoadingBeat() {
+  const reduceMotion = usePrefersReducedMotion()
+
+  return (
+    <span
+      data-success-loading=""
+      aria-hidden="true"
+      className={`block size-32 rounded-full border-2 border-border border-t-fg ${
+        reduceMotion ? '' : 'animate-spin'
+      }`}
+    />
+  )
+}
+
 export function AccountCard({ className = '' }: { className?: string }) {
   const [mode, setMode] = useState<Mode>('password')
-  const reduceMotion = usePrefersReducedMotion()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [status, setStatus] = useState('')
-  const [celebration, setCelebration] = useState<Celebration | null>(null)
+  const [celebration, setCelebration] = useState<Celebration>('lock')
+  const [phase, setPhase] = useState<Phase>('form')
+  const reduceMotion = usePrefersReducedMotion()
+
+  /* After a success the card is covered: the celebration holds for at least a
+     second, a loading beat follows, then the card returns to a clean form so the
+     flow can be tried again. */
+  useEffect(() => {
+    if (phase === 'form') return
+
+    const timer = window.setTimeout(
+      () => {
+        if (phase === 'celebrate') {
+          setPhase('loading')
+          setStatus(loadingCopy[mode])
+          return
+        }
+
+        setPhase('form')
+        setEmail('')
+        setPassword('')
+        setErrors({})
+        setStatus('')
+      },
+      phase === 'celebrate' ? successCelebrateMs : successLoadingMs,
+    )
+
+    return () => window.clearTimeout(timer)
+  }, [phase, mode])
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
+    if (phase !== 'form') return
+
     const next: { email?: string; password?: string } = {}
     const address = email.trim()
 
@@ -38,7 +87,6 @@ export function AccountCard({ className = '' }: { className?: string }) {
     setErrors(next)
     if (Object.keys(next).length > 0) {
       setStatus('')
-      setCelebration(null)
       return
     }
 
@@ -47,6 +95,7 @@ export function AccountCard({ className = '' }: { className?: string }) {
     )
     setCelebration(mode === 'password' ? 'lock' : 'plane')
     setPassword('')
+    setPhase('celebrate')
   }
 
   const slot =
@@ -70,9 +119,9 @@ export function AccountCard({ className = '' }: { className?: string }) {
     <Card
       title="Create an account"
       subtitle="Enter your email below to get started."
-      className={className}
+      className={`relative overflow-hidden ${className}`}
     >
-      <form onSubmit={submit} noValidate className="mt-16 grid gap-12">
+      <form onSubmit={submit} noValidate inert={phase !== 'form'} className="mt-16 grid gap-12">
         <Segmented
           label="Sign-in method"
           options={modeOptions}
@@ -81,7 +130,6 @@ export function AccountCard({ className = '' }: { className?: string }) {
             setMode(next)
             setErrors({})
             setStatus('')
-            setCelebration(null)
           }}
           fill
         />
@@ -105,17 +153,11 @@ export function AccountCard({ className = '' }: { className?: string }) {
             the reader prefers reduced motion). */}
         <div className="relative min-h-96">
           {reduceMotion ? (
-            celebration === 'lock' ? (
-              <LockSuccessAnimation />
-            ) : celebration === 'plane' ? (
-              <PaperPlaneSuccessAnimation />
-            ) : (
-              slot
-            )
+            slot
           ) : (
             <AnimatePresence initial={false}>
               <m.div
-                key={celebration ?? mode}
+                key={mode}
                 data-swap-slot=""
                 className="absolute inset-x-0 top-0"
                 variants={fieldSwapVariants}
@@ -123,13 +165,7 @@ export function AccountCard({ className = '' }: { className?: string }) {
                 animate="visible"
                 exit="hidden"
               >
-                {celebration === 'lock' ? (
-                  <LockSuccessAnimation />
-                ) : celebration === 'plane' ? (
-                  <PaperPlaneSuccessAnimation />
-                ) : (
-                  slot
-                )}
+                {slot}
               </m.div>
             </AnimatePresence>
           )}
@@ -138,11 +174,32 @@ export function AccountCard({ className = '' }: { className?: string }) {
         <Button size="default" type="submit" className="w-full">
           {mode === 'password' ? 'Create account' : 'Send magic link'}
         </Button>
-
-        <p role="status" className="min-h-20 text-center text-caption text-success-text">
-          {status}
-        </p>
       </form>
+
+      <p role="status" className="mt-12 min-h-20 text-center text-caption text-success-text">
+        {status}
+      </p>
+
+      {phase !== 'form' && (
+        <div
+          data-success-overlay=""
+          aria-hidden="true"
+          className="absolute inset-0 z-10 grid place-items-center rounded-xl bg-card/95 backdrop-blur-sm"
+        >
+          <div className="grid place-items-center gap-12">
+            {phase === 'celebrate' ? (
+              celebration === 'lock' ? (
+                <LockSuccessAnimation />
+              ) : (
+                <PaperPlaneSuccessAnimation />
+              )
+            ) : (
+              <LoadingBeat />
+            )}
+            <p className="text-caption text-success-text">{status}</p>
+          </div>
+        </div>
+      )}
     </Card>
   )
 }
