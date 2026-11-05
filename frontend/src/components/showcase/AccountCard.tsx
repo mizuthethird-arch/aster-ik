@@ -5,9 +5,11 @@ import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
+import { LockSuccessAnimation, PaperPlaneSuccessAnimation } from './SuccessAnimations'
 import { Segmented } from '../ui/Segmented'
 
 type Mode = 'password' | 'magic'
+type Celebration = 'lock' | 'plane'
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -23,6 +25,7 @@ export function AccountCard({ className = '' }: { className?: string }) {
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
   const [status, setStatus] = useState('')
+  const [celebration, setCelebration] = useState<Celebration | null>(null)
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -35,12 +38,14 @@ export function AccountCard({ className = '' }: { className?: string }) {
     setErrors(next)
     if (Object.keys(next).length > 0) {
       setStatus('')
+      setCelebration(null)
       return
     }
 
     setStatus(
       mode === 'password' ? `Account created for ${address}` : `Magic link sent to ${address}`,
     )
+    setCelebration(mode === 'password' ? 'lock' : 'plane')
     setPassword('')
   }
 
@@ -76,6 +81,7 @@ export function AccountCard({ className = '' }: { className?: string }) {
             setMode(next)
             setErrors({})
             setStatus('')
+            setCelebration(null)
           }}
           fill
         />
@@ -99,11 +105,17 @@ export function AccountCard({ className = '' }: { className?: string }) {
             the reader prefers reduced motion). */}
         <div className="relative min-h-96">
           {reduceMotion ? (
-            slot
+            celebration === 'lock' ? (
+              <LockSuccessAnimation />
+            ) : celebration === 'plane' ? (
+              <PaperPlaneSuccessAnimation />
+            ) : (
+              slot
+            )
           ) : (
             <AnimatePresence initial={false}>
               <m.div
-                key={mode}
+                key={celebration ?? mode}
                 data-swap-slot=""
                 className="absolute inset-x-0 top-0"
                 variants={fieldSwapVariants}
@@ -111,7 +123,13 @@ export function AccountCard({ className = '' }: { className?: string }) {
                 animate="visible"
                 exit="hidden"
               >
-                {slot}
+                {celebration === 'lock' ? (
+                  <LockSuccessAnimation />
+                ) : celebration === 'plane' ? (
+                  <PaperPlaneSuccessAnimation />
+                ) : (
+                  slot
+                )}
               </m.div>
             </AnimatePresence>
           )}

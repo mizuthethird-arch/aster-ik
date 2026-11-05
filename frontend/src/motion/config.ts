@@ -33,6 +33,31 @@ export const dialogPanelVariants = {
   hidden: { opacity: 0, scale: 0.97, transition: dialogExitTransition },
   visible: { opacity: 1, scale: 1, transition: dialogTransition },
 }
+/* Success micro-animations: a padlock opening and a paper plane taking off.
+   Body/ring settle in ~0.42s; the shackle lifts and swings on its hinge slightly
+   later; the plane draws itself and then flies out along its trail. */
+export const lockTransition = { duration: 0.42, ease: appleEase }
+export const lockShackleTransition = { duration: 0.45, ease: appleEase, delay: 0.12 }
+export const lockBodyVariants = {
+  hidden: { opacity: 0, scale: 0.9 },
+  visible: { opacity: 1, scale: 1 },
+}
+export const lockRingVariants = {
+  hidden: { opacity: 0, scale: 0.72 },
+  visible: { opacity: 0.35, scale: 1 },
+}
+export const lockShackleVariants = {
+  locked: { y: 0, rotate: 0 },
+  open: { y: -3, rotate: -14 },
+}
+export const planeDrawTransition = { duration: 0.38, ease: appleEase }
+export const planeFlightTransition = { duration: 0.55, ease: appleEase, delay: 0.3 }
+export const planeTrailTransition = { duration: 0.7, ease: appleEase, delay: 0.32 }
+export const planeCheckTransition = { duration: 0.3, ease: appleEase, delay: 0.78 }
+export const planeFlightVariants = {
+  waiting: { x: 0, y: 0, rotate: 0, opacity: 1 },
+  flown: { x: 34, y: -26, rotate: -14, opacity: 0 },
+}
 export const toastTransition = { duration: 0.18, ease: appleEase }
 export const toastExitTransition = { duration: 0.12, ease: appleEase }
 export const toastVariants = {
