@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, m } from 'motion/react'
-import type { Variants } from 'motion/react'
-import { dialogExitTransition, dialogTransition } from '../../motion/config'
+import { dialogPanelVariants } from '../../motion/config'
 import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { SearchIcon } from '../icons'
 
@@ -18,12 +17,6 @@ const sections = [
   { label: 'Elevation', href: '#elevation', note: 'The one shadow' },
   { label: 'Layout and motion', href: '#layout', note: 'Mobile first, motion on a budget' },
 ]
-
-/* The panel grows in from just under the trigger; it leaves faster than it came. */
-const panelVariants: Variants = {
-  hidden: { opacity: 0, scale: 0.97, y: 8, transition: dialogExitTransition },
-  visible: { opacity: 1, scale: 1, y: 0, transition: dialogTransition },
-}
 
 const panelClass = 'grid rounded-2xl border border-border bg-card text-fg shadow-float'
 
@@ -168,7 +161,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
           {open ? (
             <m.div
               key="search-panel"
-              variants={panelVariants}
+              variants={dialogPanelVariants}
               initial="hidden"
               animate="visible"
               exit="hidden"

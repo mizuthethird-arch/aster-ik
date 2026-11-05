@@ -22,6 +22,17 @@ export const dialogExitTransition = {
   ease: [0.4, 0, 1, 1] as [number, number, number, number],
 }
 export const themeRevealTransition = { duration: 0.55, ease: appleEase }
+
+/*
+ * The dialog panel only scales inward and fades. It must never translate: a
+ * transformed panel that overhangs the native <dialog> makes the dialog's own
+ * overflow area scrollable, which flashes its scrollbar for a frame on open
+ * and close.
+ */
+export const dialogPanelVariants = {
+  hidden: { opacity: 0, scale: 0.97, transition: dialogExitTransition },
+  visible: { opacity: 1, scale: 1, transition: dialogTransition },
+}
 export const iconSpring = { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.7 }
 
 /*

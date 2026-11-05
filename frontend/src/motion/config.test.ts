@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   appleEase,
   dialogExitTransition,
+  dialogPanelVariants,
   dialogTransition,
   iconSpring,
   menuExitTransition,
@@ -60,5 +61,15 @@ describe('motion config', () => {
     expect(menuIconLines.top.open).toEqual({ rotate: 45, y: 3 })
     expect(menuIconLines.bottom.closed).toEqual({ rotate: 0, y: 0 })
     expect(menuIconLines.bottom.open).toEqual({ rotate: -45, y: -3 })
+  })
+  it('scales the dialog panel inward without translating it into a scrollbar', () => {
+    expect(dialogPanelVariants.hidden).toMatchObject({ opacity: 0 })
+    expect(dialogPanelVariants.visible).toMatchObject({ opacity: 1, scale: 1 })
+    expect(dialogPanelVariants.hidden.scale).toBeLessThan(1)
+
+    // A vertical translate makes the transformed panel overflow the dialog,
+    // which flashes the dialog's own scrollbar on open and close.
+    expect('y' in dialogPanelVariants.hidden).toBe(false)
+    expect('y' in dialogPanelVariants.visible).toBe(false)
   })
 })
