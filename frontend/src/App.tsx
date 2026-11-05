@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 
+import { Header } from './components/layout/Header'
+
 /*
  * F1 — design-token specimen.
  *
@@ -309,7 +311,7 @@ function SwatchList({ tokens }: { tokens: Swatch[] }) {
         <li key={token.name} className="rounded-2xl border border-border bg-card p-22">
           <div
             aria-hidden="true"
-            className={`flex h-16 items-center justify-center rounded-lg border border-border ${token.className}`}
+            className={`grid h-16 place-items-center rounded-lg border border-border ${token.className}`}
           >
             {token.sample ? <span className="text-body-medium">{token.sample}</span> : null}
           </div>
@@ -322,18 +324,20 @@ function SwatchList({ tokens }: { tokens: Swatch[] }) {
 }
 
 function Section({
+  id,
   eyebrow,
   title,
   intro,
   children,
 }: {
+  id: string
   eyebrow: string
   title: string
   intro: string
   children: React.ReactNode
 }) {
   return (
-    <section className="border-t border-border pt-72 md:pt-112">
+    <section id={id} className="border-t border-border pt-72 md:pt-112">
       <p className="font-mono text-eyebrow uppercase text-muted">{eyebrow}</p>
       <h2 className="mt-8 text-heading-md text-fg md:text-heading-lg">{title}</h2>
       <p className="mt-14 max-w-intro text-lead-sm text-muted">{intro}</p>
@@ -348,10 +352,10 @@ function TokenRows({ rows }: { rows: { name: string; note: string }[] }) {
       {rows.map((row) => (
         <li
           key={row.name}
-          className="flex flex-wrap items-baseline justify-between gap-8 border-b border-border py-14"
+          className="grid gap-8 border-b border-border py-14 sm:grid-cols-[auto_1fr] sm:items-baseline"
         >
           <span className="font-mono text-caption text-fg">{row.name}</span>
-          <span className="text-small text-muted">{row.note}</span>
+          <span className="text-small text-muted sm:justify-self-end">{row.note}</span>
         </li>
       ))}
     </ul>
@@ -369,21 +373,15 @@ function App() {
 
   return (
     <div className="min-h-svh">
-      <header className="border-b border-border">
-        <div className="mx-auto flex h-header max-w-page items-center justify-between px-16 sm:px-24 md:px-32">
-          <span className="font-wordmark text-wordmark text-fg">aster-ik</span>
-          <button
-            type="button"
-            aria-pressed={theme === 'light'}
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            className="inline-flex h-control items-center rounded-lg border border-border bg-card px-16 text-body-medium text-fg transition-ui hover:bg-subtle"
-          >
-            Light theme
-          </button>
-        </div>
-      </header>
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-16 focus:left-16 focus:z-10 focus:inline-grid focus:h-control focus:place-items-center focus:rounded-lg focus:border focus:border-border focus:bg-card focus:px-16 focus:text-body-medium focus:text-fg"
+      >
+        Skip to content
+      </a>
+      <Header theme={theme} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
 
-      <main className="mx-auto max-w-page px-16 pb-72 sm:px-24 md:px-32">
+      <main id="main" className="mx-auto max-w-page px-16 pb-72 sm:px-24 md:px-32">
         <section className="relative isolate pt-64">
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-grid" />
           <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-glow" />
@@ -399,6 +397,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="colour"
             eyebrow="Colour"
             title="Quiet surfaces. One accent."
             intro="The product layer stays neutral: hairlines, one soft elevation and colour only from the accent a product picks and from status."
@@ -433,6 +432,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="typography"
             eyebrow="Typography"
             title="Readable APIs. Predictable results."
             intro="Geist carries the interface, Geist Mono carries code and labels, and Sora 800 is only ever the wordmark."
@@ -452,6 +452,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="spacing"
             eyebrow="Spacing"
             title="A 1px rhythm. Nothing off-scale."
             intro="Gutters, section padding, card padding and control gaps all come from the same pixel scale."
@@ -460,7 +461,7 @@ function App() {
               {spacingScale.map((step) => (
                 <li
                   key={step.name}
-                  className="flex items-center gap-16 border-b border-border py-10"
+                  className="grid grid-flow-col auto-cols-max items-center gap-16 border-b border-border py-10"
                 >
                   <span className="w-72 shrink-0 font-mono text-caption text-muted">
                     {step.name}
@@ -474,6 +475,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="radii"
             eyebrow="Radii"
             title="Small surface. Soft edges."
             intro="One radius scale; large containers stick to radius-2xl, controls to radius-lg."
@@ -494,6 +496,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="elevation"
             eyebrow="Elevation"
             title="Flat, with one exception."
             intro="Everything sits on the page with a hairline. Only things that genuinely float take the one shadow."
@@ -509,6 +512,7 @@ function App() {
 
         <div className="mt-72">
           <Section
+            id="layout"
             eyebrow="Layout and motion"
             title="Mobile first. Motion on a budget."
             intro="Layout starts on the phone and scales up; motion is short, functional and removed when the reader asks for less."
