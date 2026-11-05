@@ -9,7 +9,11 @@ type SegmentedProps<T extends string> = {
   className?: string
 }
 
-/* Small pressed-button group used for view switches (auth method, chart range). */
+/*
+ * Pressed-button group for view switches (auth method, chart range). One shared
+ * inverted pill slides between the options, so the surface moves instead of two
+ * backgrounds swapping; the active label flips to inverted-fg text.
+ */
 export function Segmented<T extends string>({
   label,
   options,
@@ -18,29 +22,47 @@ export function Segmented<T extends string>({
   fill = false,
   className = '',
 }: SegmentedProps<T>) {
+  const index = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  )
+
   return (
     <div
       role="group"
       aria-label={label}
-      className={`grid items-center gap-4 rounded-md border border-border bg-bg p-4 ${
-        fill ? 'w-full grid-cols-2' : 'grid-flow-col auto-cols-max'
+      style={{ gridTemplateColumns: `repeat(${options.length}, minmax(0, 1fr))` }}
+      className={`relative items-center rounded-md border border-border bg-bg p-6 ${
+        fill ? 'grid w-full' : 'inline-grid'
       } ${className}`}
     >
-      {options.map((option) => (
-        <button
-          key={option.value}
-          type="button"
-          aria-pressed={option.value === value}
-          onClick={() => onChange(option.value)}
-          className={`h-control-sm rounded-sm px-10 text-label transition-ui ${
-            option.value === value
-              ? 'bg-subtle text-fg'
-              : 'text-muted hover:bg-subtle hover:text-fg'
-          }`}
-        >
-          {option.label}
-        </button>
-      ))}
+      <span
+        aria-hidden="true"
+        data-segmented-indicator=""
+        className="slide-surface pointer-events-none absolute top-6 bottom-6 left-6 rounded-sm bg-inv"
+        style={{
+          width: `calc((100% - 12px) / ${options.length})`,
+          transform: `translateX(${index * 100}%)`,
+        }}
+      />
+
+      {options.map((option) => {
+        const active = option.value === value
+
+        return (
+          <button
+            key={option.value}
+            type="button"
+            aria-pressed={active}
+            onClick={() => onChange(option.value)}
+            className={`relative z-10 h-control-sm rounded-sm px-10 text-label transition-ui ${
+              active ? 'text-inv-fg' : 'text-fg hover:bg-subtle'
+            }`}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }

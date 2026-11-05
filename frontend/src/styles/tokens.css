@@ -437,3 +437,13 @@
     --aster-ik-motion-slow: 0ms;
   }
 }
+/* --- Sliding selection surface ------------------------------------------ */
+
+/* One inverted pill slides between options with an Apple-style decelerating
+   spring: a linear() curve with a ~1.5% overshoot at the end. Duration and
+   easing ride the motion tokens, so prefers-reduced-motion makes it instant. */
+@utility slide-surface {
+  transition: transform var(--aster-ik-motion-slow)
+    linear(0, 0.22 10%, 0.55 25%, 0.83 42%, 0.96 58%, 1.015 72%, 1 100%);
+  will-change: transform;
+}
