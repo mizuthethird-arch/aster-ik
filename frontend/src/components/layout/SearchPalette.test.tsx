@@ -53,12 +53,23 @@ describe('SearchPalette', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('opens, labels itself and focuses the search field', () => {
+  it('opens and labels itself without focusing the search field', () => {
     renderPalette()
 
     expect(dialog().open).toBe(true)
     expect(screen.getByRole('dialog', { name: 'Search this page' })).toBeInTheDocument()
-    expect(screen.getByRole('searchbox', { name: 'Search this page' })).toHaveFocus()
+    expect(screen.getByRole('searchbox', { name: 'Search this page' })).not.toHaveFocus()
+    expect(dialog()).toHaveFocus()
+  })
+
+  it('moves focus into the field on the first Tab', async () => {
+    const user = userEvent.setup()
+    renderPalette()
+    expect(dialog()).toHaveFocus()
+
+    await user.tab()
+
+    expect(screen.getByRole('searchbox')).toHaveFocus()
   })
 
   it('lists every section with its anchor', () => {
