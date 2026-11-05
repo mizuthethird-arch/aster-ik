@@ -39,6 +39,7 @@ export const dialogPanelVariants = {
 /* Account success choreography: the celebration holds for at least a second,
    then a loading beat, then the card returns to its form so it can be retried. */
 export const successCelebrateMs = 1400
+export const successPlaneCelebrateMs = 2400
 export const successLoadingMs = 1600
 export const lockTransition = { duration: 0.42, ease: appleEase }
 export const lockShackleTransition = { duration: 0.45, ease: appleEase, delay: 0.12 }
@@ -54,10 +55,10 @@ export const lockShackleVariants = {
   locked: { y: 0, rotate: 0 },
   open: { y: -3, rotate: -14 },
 }
-export const planeDrawTransition = { duration: 0.38, ease: appleEase }
-export const planeFlightTransition = { duration: 0.55, ease: appleEase, delay: 0.3 }
-export const planeTrailTransition = { duration: 0.7, ease: appleEase, delay: 0.32 }
-export const planeCheckTransition = { duration: 0.3, ease: appleEase, delay: 0.78 }
+export const planeDrawTransition = { duration: 1.1, ease: 'linear' as const }
+export const planeFlightTransition = { duration: 0.55, ease: appleEase, delay: 1.15 }
+export const planeTrailTransition = { duration: 0.6, ease: appleEase, delay: 1.15 }
+export const planeCheckTransition = { duration: 0.3, ease: appleEase, delay: 1.8 }
 export const planeFlightVariants = {
   waiting: { x: 0, y: 0, rotate: 0, opacity: 1 },
   flown: { x: 34, y: -26, rotate: -14, opacity: 0 },

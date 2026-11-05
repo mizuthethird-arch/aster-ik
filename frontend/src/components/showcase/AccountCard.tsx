@@ -1,6 +1,11 @@
 import { AnimatePresence, m } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { fieldSwapVariants, successCelebrateMs, successLoadingMs } from '../../motion/config'
+import {
+  fieldSwapVariants,
+  successCelebrateMs,
+  successLoadingMs,
+  successPlaneCelebrateMs,
+} from '../../motion/config'
 import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
@@ -68,11 +73,15 @@ export function AccountCard({ className = '' }: { className?: string }) {
         setErrors({})
         setStatus('')
       },
-      phase === 'celebrate' ? successCelebrateMs : successLoadingMs,
+      phase === 'celebrate'
+        ? celebration === 'plane'
+          ? successPlaneCelebrateMs
+          : successCelebrateMs
+        : successLoadingMs,
     )
 
     return () => window.clearTimeout(timer)
-  }, [phase, mode])
+  }, [phase, celebration])
 
   const submit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
