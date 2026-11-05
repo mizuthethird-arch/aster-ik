@@ -62,6 +62,12 @@ describe('SearchPalette', () => {
     expect(dialog()).toHaveFocus()
   })
 
+  it('animates the field focus ring instead of snapping it on', () => {
+    renderPalette()
+
+    const input = screen.getByRole('searchbox')
+    expect(input).toHaveClass('field-focus', 'border', 'border-transparent')
+  })
   it('moves focus into the field on the first Tab', async () => {
     const user = userEvent.setup()
     renderPalette()
