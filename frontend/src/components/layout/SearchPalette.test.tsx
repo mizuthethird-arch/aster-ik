@@ -1,12 +1,46 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
+import { MotionProvider } from '../../motion/MotionProvider'
+import { setPrefersReducedMotion } from '../../test/match-media'
 import { SearchPalette } from './SearchPalette'
 
 function renderPalette(open = true) {
   const onClose = vi.fn()
-  const view = render(<SearchPalette open={open} onClose={onClose} />)
-  return { onClose, ...view }
+  const view = render(
+    <MotionProvider>
+      <SearchPalette open={open} onClose={onClose} />
+    </MotionProvider>,
+  )
+  const rerenderPalette = (nextOpen: boolean) =>
+    view.rerender(
+      <MotionProvider>
+        <SearchPalette open={nextOpen} onClose={onClose} />
+      </MotionProvider>,
+    )
+  return { onClose, rerenderPalette }
+}
+
+/* A stateful parent, so a close request actually flips the open prop. */
+function renderInteractivePalette() {
+  const onClose = vi.fn()
+  function Harness() {
+    const [open, setOpen] = useState(true)
+    return (
+      <MotionProvider>
+        <SearchPalette
+          open={open}
+          onClose={() => {
+            onClose()
+            setOpen(false)
+          }}
+        />
+      </MotionProvider>
+    )
+  }
+  render(<Harness />)
+  return { onClose }
 }
 
 const dialog = () => document.querySelector('dialog') as HTMLDialogElement
@@ -102,31 +136,75 @@ describe('SearchPalette', () => {
 
   it('closes when a result is chosen', async () => {
     const user = userEvent.setup()
-    const { onClose } = renderPalette()
+    const { onClose } = renderInteractivePalette()
 
     await user.click(screen.getByRole('link', { name: /^Typography:/ }))
 
-    expect(onClose).toHaveBeenCalled()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
   })
 
-  it('closes when the open prop turns false', () => {
-    const { onClose, rerender } = renderPalette(true)
+  it('keeps the dialog open while the panel animates out', async () => {
+    const { rerenderPalette } = renderPalette(true)
 
-    rerender(<SearchPalette open={false} onClose={onClose} />)
+    rerenderPalette(false)
+
+    // The exit animation owns the close: the dialog is still open right after
+    // the parent flips the prop.
+    expect(dialog().open).toBe(true)
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
+  })
+
+  it('closes instantly when motion is reduced', () => {
+    setPrefersReducedMotion(true)
+    const { rerenderPalette } = renderPalette(true)
+
+    rerenderPalette(false)
 
     expect(dialog().open).toBe(false)
-    expect(onClose).toHaveBeenCalled()
   })
 
-  it('resets the query when it reopens', async () => {
+  it('closes when the backdrop is clicked', async () => {
+    const { onClose } = renderInteractivePalette()
+
+    fireEvent.click(dialog())
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
+  })
+
+  it('stays open when the panel itself is clicked', () => {
+    const { onClose } = renderInteractivePalette()
+
+    fireEvent.click(screen.getByRole('searchbox'))
+    fireEvent.click(document.querySelector('dialog ul') as HTMLUListElement)
+
+    expect(onClose).not.toHaveBeenCalled()
+    expect(dialog().open).toBe(true)
+  })
+
+  it('animates out when cancelled with Escape', async () => {
+    const { onClose } = renderInteractivePalette()
+    const dialogEl = dialog()
+
+    fireEvent(dialogEl, new Event('cancel', { cancelable: true }))
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+    // The handler keeps the dialog open so the panel can animate out.
+    expect(dialogEl.open).toBe(true)
+    await waitFor(() => expect(dialogEl.open).toBe(false), { timeout: 3000 })
+  })
+
+  it('starts from an empty query each time it opens', async () => {
     const user = userEvent.setup()
-    const { onClose, rerender } = renderPalette(true)
+    const { rerenderPalette } = renderPalette(true)
     await user.type(screen.getByRole('searchbox'), 'spa')
 
-    rerender(<SearchPalette open={false} onClose={onClose} />)
-    rerender(<SearchPalette open={true} onClose={onClose} />)
+    rerenderPalette(false)
+    await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
+    rerenderPalette(true)
 
-    expect(screen.getByRole('searchbox')).toHaveValue('')
+    await waitFor(() => expect(screen.getByRole('searchbox')).toHaveValue(''))
     expect(screen.getAllByRole('link')).toHaveLength(6)
   })
 })

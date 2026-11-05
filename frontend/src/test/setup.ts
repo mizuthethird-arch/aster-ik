@@ -20,6 +20,11 @@ afterEach(() => {
 if (typeof HTMLDialogElement !== 'undefined') {
   HTMLDialogElement.prototype.showModal = function showModal(this: HTMLDialogElement) {
     this.setAttribute('open', '')
+    /* Browsers move focus to the autofocus element, else the first focusable one. */
+    const target = this.querySelector<HTMLElement>(
+      '[autofocus], input, button, a[href], select, textarea, [tabindex]',
+    )
+    target?.focus()
   }
   HTMLDialogElement.prototype.close = function close(this: HTMLDialogElement) {
     if (!this.hasAttribute('open')) return

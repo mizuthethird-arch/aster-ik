@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
   appleEase,
+  dialogExitTransition,
+  dialogTransition,
   iconSpring,
   menuExitTransition,
   menuIconLines,
@@ -24,8 +26,14 @@ describe('motion config', () => {
     expect(appleEase[1]).toBeGreaterThan(appleEase[0])
   })
 
-  it('keeps the menu durations in the 150–400ms band', () => {
-    for (const transition of [menuTransition, menuExitTransition, menuIconTransition]) {
+  it('keeps the menu and dialog durations in the 150–400ms band', () => {
+    for (const transition of [
+      menuTransition,
+      menuExitTransition,
+      menuIconTransition,
+      dialogTransition,
+      dialogExitTransition,
+    ]) {
       expect(transition.duration).toBeGreaterThanOrEqual(0.15)
       expect(transition.duration).toBeLessThanOrEqual(0.4)
     }
@@ -38,6 +46,7 @@ describe('motion config', () => {
 
   it('exits faster than it enters', () => {
     expect(menuExitTransition.duration).toBeLessThan(menuTransition.duration)
+    expect(dialogExitTransition.duration).toBeLessThan(dialogTransition.duration)
   })
 
   it('swaps the theme icon on a spring, not a tween', () => {
