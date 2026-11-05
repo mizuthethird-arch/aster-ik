@@ -111,6 +111,56 @@ describe('AccountCard', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Magic link sent to mira@example.com')
   })
 
+  it('celebrates a created account with the unlocking lock animation', async () => {
+    const user = userEvent.setup()
+    renderAccount()
+
+    await user.type(screen.getByLabelText('Email'), 'mira@example.com')
+    await user.type(screen.getByLabelText('Password'), 'supersecret')
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+
+    const lock = document.querySelector('[data-success="lock"]')
+    expect(lock).not.toBeNull()
+    expect(lock).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getByRole('status')).toHaveTextContent('Account created for mira@example.com')
+  })
+
+  it('celebrates the magic link with the paper plane animation', async () => {
+    const user = userEvent.setup()
+    renderAccount()
+
+    await user.click(screen.getByRole('button', { name: 'Magic link' }))
+    await waitForElementToBeRemoved(passwordField)
+    await user.type(screen.getByLabelText('Email'), 'mira@example.com')
+    await user.click(screen.getByRole('button', { name: 'Send magic link' }))
+
+    expect(document.querySelector('[data-success="plane"]')).not.toBeNull()
+    expect(screen.getByRole('status')).toHaveTextContent('Magic link sent to mira@example.com')
+  })
+
+  it('does not celebrate an invalid submission', async () => {
+    const user = userEvent.setup()
+    renderAccount()
+
+    await user.type(screen.getByLabelText('Email'), 'nope')
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+
+    expect(document.querySelector('[data-success]')).toBeNull()
+  })
+
+  it('clears the celebration when the reader switches methods', async () => {
+    const user = userEvent.setup()
+    renderAccount()
+
+    await user.type(screen.getByLabelText('Email'), 'mira@example.com')
+    await user.type(screen.getByLabelText('Password'), 'supersecret')
+    await user.click(screen.getByRole('button', { name: 'Create account' }))
+    expect(document.querySelector('[data-success="lock"]')).not.toBeNull()
+
+    await user.click(screen.getByRole('button', { name: 'Password' }))
+    await waitForElementToBeRemoved(() => document.querySelector('[data-success]'))
+    expect(document.querySelector('[data-success]')).toBeNull()
+  })
   it('reserves the status line so switching methods never resizes the form', async () => {
     const user = userEvent.setup()
     renderAccount()
