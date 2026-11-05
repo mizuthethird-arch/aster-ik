@@ -78,3 +78,18 @@ export function CheckIcon({ className }: IconProps) {
     </svg>
   )
 }
+export function ChevronLeftIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
+      <path d="m15 18-6-6 6-6" />
+    </svg>
+  )
+}
+
+export function ChevronRightIcon({ className }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
+      <path d="m9 18 6-6-6-6" />
+    </svg>
+  )
+}

@@ -55,10 +55,24 @@ describe('App shell', () => {
     expect(controls.length).toBeGreaterThan(0)
 
     for (const control of controls) {
+      const labelledBy = control.getAttribute('aria-labelledby')
+      const labelledByText = labelledBy
+        ? labelledBy
+            .split(/\s+/)
+            .map((id) => document.getElementById(id)?.textContent ?? '')
+            .join(' ')
+        : ''
+      const labels = control instanceof HTMLInputElement ? control.labels : null
+      const label = labels
+        ? Array.from(labels, (element) => element.textContent ?? '').join(' ')
+        : ''
+
       const name = (
         control.textContent ||
         control.getAttribute('aria-label') ||
         control.getAttribute('title') ||
+        labelledByText ||
+        label ||
         ''
       ).trim()
       expect(name, `unnamed control: ${control.outerHTML.slice(0, 60)}`).not.toBe('')

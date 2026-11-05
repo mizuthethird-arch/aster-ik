@@ -1,0 +1,99 @@
+import { useState } from 'react'
+import { Button } from '../ui/Button'
+import { Card } from '../ui/Card'
+import { Input } from '../ui/Input'
+import { Segmented } from '../ui/Segmented'
+
+type Mode = 'password' | 'magic'
+
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+const modeOptions = [
+  { value: 'password', label: 'Password' },
+  { value: 'magic', label: 'Magic link' },
+] as const
+
+export function AccountCard({ className = '' }: { className?: string }) {
+  const [mode, setMode] = useState<Mode>('password')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
+  const [status, setStatus] = useState('')
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const next: { email?: string; password?: string } = {}
+    const address = email.trim()
+
+    if (!emailPattern.test(address)) next.email = 'Enter a valid email address.'
+    if (mode === 'password' && password.length < 8) next.password = 'Use at least 8 characters.'
+
+    setErrors(next)
+    if (Object.keys(next).length > 0) {
+      setStatus('')
+      return
+    }
+
+    setStatus(
+      mode === 'password' ? `Account created for ${address}` : `Magic link sent to ${address}`,
+    )
+    setPassword('')
+  }
+
+  return (
+    <Card
+      title="Create an account"
+      subtitle="Enter your email below to get started."
+      className={className}
+    >
+      <form onSubmit={submit} noValidate className="mt-16 grid gap-12">
+        <Segmented
+          label="Sign-in method"
+          options={modeOptions}
+          value={mode}
+          onChange={(next) => {
+            setMode(next)
+            setErrors({})
+            setStatus('')
+          }}
+          fill
+        />
+
+        <p className="text-center text-caption text-muted">OR</p>
+
+        <Input
+          id="account-email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="name@company.com"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          error={errors.email}
+        />
+
+        {mode === 'password' && (
+          <Input
+            id="account-password"
+            label="Password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            error={errors.password}
+          />
+        )}
+
+        <Button size="default" type="submit" className="w-full">
+          {mode === 'password' ? 'Create account' : 'Send magic link'}
+        </Button>
+
+        {status && (
+          <p role="status" className="text-center text-caption text-success-text">
+            {status}
+          </p>
+        )}
+      </form>
+    </Card>
+  )
+}
