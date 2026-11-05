@@ -14,6 +14,17 @@ describe('CalendarCard', () => {
     expect(screen.getByRole('button', { name: '31' })).toBeInTheDocument()
   })
 
+  it('always keeps six week rows so navigating months cannot resize the card', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<CalendarCard />)
+
+    const grid = () => container.querySelector('[data-calendar-grid]')
+    expect(grid()?.children).toHaveLength(49)
+
+    await user.click(screen.getByRole('button', { name: 'Next month' }))
+
+    expect(grid()?.children).toHaveLength(49)
+  })
   it('selects another day', async () => {
     const user = userEvent.setup()
     render(<CalendarCard />)

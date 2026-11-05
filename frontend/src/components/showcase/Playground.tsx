@@ -25,15 +25,15 @@ export function Playground({ onToggleTheme }: { onToggleTheme: () => void }) {
       </h2>
 
       <div className="mt-32 grid grid-cols-1 items-stretch gap-16 sm:grid-cols-2 lg:grid-cols-3">
-        <AccountCard />
-        <CalendarCard />
-        <div className="grid grid-rows-[1.2fr_1fr] gap-16">
+        <AccountCard className="sm:order-1 lg:order-none" />
+        <CalendarCard className="sm:order-2 lg:order-none" />
+        <div className="grid grid-rows-[1.2fr_1fr] gap-16 sm:order-4 lg:order-none">
           <NotificationsCard />
           <ToastCard />
         </div>
-        <ActivityCard className="sm:col-span-2" />
-        <CommandCard onToggleTheme={onToggleTheme} />
-        <ControlsCard className="sm:col-span-2" />
+        <ActivityCard className="sm:order-3 sm:col-span-2 lg:order-none" />
+        <CommandCard className="sm:order-5 lg:order-none" onToggleTheme={onToggleTheme} />
+        <ControlsCard className="sm:order-6 sm:col-span-2 lg:order-none" />
       </div>
     </section>
   )

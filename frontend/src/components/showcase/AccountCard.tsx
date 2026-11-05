@@ -72,27 +72,33 @@ export function AccountCard({ className = '' }: { className?: string }) {
           error={errors.email}
         />
 
-        {mode === 'password' && (
-          <Input
-            id="account-password"
-            label="Password"
-            type="password"
-            autoComplete="current-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            error={errors.password}
-          />
-        )}
+        {/* Fixed-height slot: the password field and the magic-link note occupy
+            the same space, so switching methods never resizes the card. */}
+        <div className="min-h-96">
+          {mode === 'password' ? (
+            <Input
+              id="account-password"
+              label="Password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              error={errors.password}
+            />
+          ) : (
+            <p className="grid min-h-96 content-center rounded-input border border-border px-12 text-caption text-muted">
+              We email you a one-time link — no password needed.
+            </p>
+          )}
+        </div>
 
         <Button size="default" type="submit" className="w-full">
           {mode === 'password' ? 'Create account' : 'Send magic link'}
         </Button>
 
-        {status && (
-          <p role="status" className="text-center text-caption text-success-text">
-            {status}
-          </p>
-        )}
+        <p role="status" className="min-h-20 text-center text-caption text-success-text">
+          {status}
+        </p>
       </form>
     </Card>
   )

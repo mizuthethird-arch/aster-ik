@@ -27,11 +27,10 @@ export function Input({ id, label, error, className = '', ...props }: InputProps
         } ${className}`}
         {...props}
       />
-      {error && (
-        <p id={errorId} className="text-caption text-danger-text">
-          {error}
-        </p>
-      )}
+      {/* The line is always reserved: showing an error must not resize the card. */}
+      <p id={errorId} className="min-h-20 text-caption text-danger-text">
+        {error}
+      </p>
     </div>
   )
 }

@@ -119,7 +119,12 @@ export function CommandCard({
 
       <p className="mt-12 text-caption text-muted">Suggestions</p>
 
-      <div id="command-list" role="listbox" aria-label="Suggestions" className="mt-6 grid gap-2">
+      <div
+        id="command-list"
+        role="listbox"
+        aria-label="Suggestions"
+        className="mt-6 grid min-h-command-list flex-1 content-start gap-2"
+      >
         {filtered.map((command, index) => (
           <button
             key={command.id}
@@ -129,7 +134,7 @@ export function CommandCard({
             aria-selected={index === activeIndex}
             onClick={() => runCommand(command)}
             onMouseEnter={() => setActiveIndex(index)}
-            className={`grid grid-cols-[1fr_auto] items-center gap-8 rounded-sm px-8 py-4 text-left text-body transition-ui ${
+            className={`grid h-32 grid-cols-[1fr_auto] items-center gap-8 rounded-sm px-8 text-left text-body transition-ui ${
               index === activeIndex
                 ? 'bg-subtle text-fg'
                 : 'text-muted hover:bg-subtle hover:text-fg'

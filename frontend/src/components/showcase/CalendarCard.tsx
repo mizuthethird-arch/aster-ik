@@ -71,7 +71,7 @@ export function CalendarCard({ className = '' }: { className?: string }) {
         </div>
       </div>
 
-      <div className="mt-12 grid grid-cols-7 gap-2 text-center">
+      <div data-calendar-grid="" className="mt-12 grid grid-cols-7 gap-2 text-center">
         {weekdays.map((day) => (
           <span key={day} className="text-caption text-muted">
             {day}
@@ -80,6 +80,10 @@ export function CalendarCard({ className = '' }: { className?: string }) {
 
         {Array.from({ length: leadingBlanks(view) }, (_, index) => (
           <span key={`blank-${index}`} aria-hidden="true" />
+        ))}
+
+        {Array.from({ length: 42 - leadingBlanks(view) - daysIn(view) }, (_, index) => (
+          <span key={`trail-${index}`} aria-hidden="true" className="h-32" />
         ))}
 
         {Array.from({ length: daysIn(view) }, (_, index) => {

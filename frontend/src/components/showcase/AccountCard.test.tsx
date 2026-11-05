@@ -23,6 +23,16 @@ describe('AccountCard', () => {
     expect(screen.getByRole('button', { name: 'Send magic link' })).toBeInTheDocument()
   })
 
+  it('reserves the status line so switching methods never resizes the form', async () => {
+    const user = userEvent.setup()
+    render(<AccountCard />)
+
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    await user.click(screen.getByRole('button', { name: 'Magic link' }))
+
+    expect(screen.getByText(/one-time link/i)).toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+  })
   it('reports an invalid email', async () => {
     const user = userEvent.setup()
     render(<AccountCard />)
