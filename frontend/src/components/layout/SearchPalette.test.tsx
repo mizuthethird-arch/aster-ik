@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { MotionProvider } from '../../motion/MotionProvider'
-import { setPrefersReducedMotion } from '../../test/match-media'
+import { setCoarsePointer, setPrefersReducedMotion } from '../../test/match-media'
 import { SearchPalette } from './SearchPalette'
 
 function renderPalette(open = true) {
@@ -155,6 +155,13 @@ describe('SearchPalette', () => {
     await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
   })
 
+  it('keeps focus out of the field on touch devices, so opening never zooms', () => {
+    setCoarsePointer(true)
+    renderPalette()
+
+    expect(screen.getByRole('searchbox')).not.toHaveFocus()
+    expect(dialog()).toHaveFocus()
+  })
   it('locks the page scroll while the dialog is open', async () => {
     const user = userEvent.setup()
     renderInteractivePalette()

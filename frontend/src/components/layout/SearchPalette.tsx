@@ -29,10 +29,18 @@ function setScrollLock(locked: boolean) {
 }
 
 /*
- * The panel mounts per opening, so every search starts empty and the field
- * takes focus through the dialog's autofocus, without a state-syncing effect.
+ * The panel mounts per opening, so every search starts empty. Focus is moved by
+ * the dialog (field on a fine pointer, the dialog itself on touch) rather than
+ * by an autofocus attribute: the browser would otherwise focus the field on
+ * modal open, which zooms and raises the keyboard on phones.
  */
-function SearchPanel({ onClose }: { onClose: () => void }) {
+function SearchPanel({
+  onClose,
+  inputRef,
+}: {
+  onClose: () => void
+  inputRef: React.RefObject<HTMLInputElement | null>
+}) {
   const [query, setQuery] = useState('')
   const needle = query.trim().toLowerCase()
   const matches = sections.filter((section) =>
@@ -44,12 +52,13 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
       <div className="grid grid-cols-[auto_1fr] items-center gap-8 border-b border-border px-16 py-10">
         <SearchIcon className="size-16 text-muted" />
         <input
+          ref={inputRef}
           type="search"
-          autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search this page…"
           aria-label="Search this page"
+          tabIndex={-1}
           className="h-control w-full rounded-input bg-transparent px-8 text-body text-fg placeholder:text-muted"
         />
       </div>
@@ -85,8 +94,15 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
 
 export function SearchPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
   const closingRef = useRef(false)
   const reduceMotion = usePrefersReducedMotion()
+  /* Touch devices must not focus the field: it zooms the page and raises the
+     keyboard before the reader has asked to type. */
+  const [canFocusField] = useState(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return true
+    return window.matchMedia('(pointer: fine)').matches
+  })
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -98,7 +114,11 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       dialog.close()
       setScrollLock(false)
     }
-  }, [open, reduceMotion])
+    if (open) {
+      if (canFocusField) inputRef.current?.focus()
+      else dialog.focus()
+    }
+  }, [open, reduceMotion, canFocusField])
 
   /* Never leave the page locked if the palette unmounts mid-open. */
   useEffect(() => () => setScrollLock(false), [])
@@ -148,12 +168,13 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       onKeyDown={handleKeyDown}
       onClick={handleDialogClick}
       aria-label="Search this page"
+      tabIndex={-1}
       className="m-auto w-full border-0 bg-transparent p-0 text-fg backdrop:bg-bg/80 sm:max-w-intro"
     >
       {reduceMotion ? (
         open ? (
           <div className={panelClass}>
-            <SearchPanel onClose={onClose} />
+            <SearchPanel onClose={onClose} inputRef={inputRef} />
           </div>
         ) : null
       ) : (
@@ -167,7 +188,7 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
               exit="hidden"
               className={panelClass}
             >
-              <SearchPanel onClose={onClose} />
+              <SearchPanel onClose={onClose} inputRef={inputRef} />
             </m.div>
           ) : null}
         </AnimatePresence>

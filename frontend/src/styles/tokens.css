@@ -235,6 +235,11 @@
   --text-kbd: 11px;
   --text-kbd--line-height: 1.4;
   --text-kbd--font-weight: 500;
+  /* The input floor: iOS zooms any focused field below 16px. The brand body size
+     stays 14px on pointer:fine; touch pointers get this. */
+  --text-input: 16px;
+  --text-input--line-height: 1.5;
+  --text-input--font-weight: 400;
   --text-wordmark: 19px;
   --text-wordmark--line-height: 1;
   --text-wordmark--font-weight: 800;
@@ -411,4 +416,18 @@
 /* A scroll region that never reflows its contents when the scrollbar appears. */
 @utility scroll-gutter-stable {
   scrollbar-gutter: stable;
+}
+/* --- Touch input floor -------------------------------------------------- */
+
+/* iOS zooms any focused field under 16px. On touch pointers every text field
+   gets the input size, so tapping the field never zooms the page. Unlayered on
+   purpose: it must win over component text utilities. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: var(--text-input);
+    line-height: var(--text-input--line-height);
+    font-weight: var(--text-input--font-weight);
+  }
 }
