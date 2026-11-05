@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react'
+import { flushSync } from 'react-dom'
 
 import { Header } from './components/layout/Header'
+import { MotionProvider } from './motion/MotionProvider'
+import { startThemeReveal } from './motion/theme-reveal'
+import type { RevealOrigin } from './motion/theme-reveal'
+import { usePrefersReducedMotion } from './motion/use-prefers-reduced-motion'
 
 /*
  * F1 — design-token specimen.
@@ -364,6 +369,7 @@ function TokenRows({ rows }: { rows: { name: string; note: string }[] }) {
 
 function App() {
   const [theme, setTheme] = useState<Theme>('dark')
+  const reduceMotion = usePrefersReducedMotion()
 
   useEffect(() => {
     const root = document.documentElement
@@ -371,170 +377,184 @@ function App() {
     else root.removeAttribute('data-theme')
   }, [theme])
 
+  const toggleTheme = (origin: RevealOrigin) => {
+    /* The next theme is revealed by a circle growing out of the toggle. */
+    startThemeReveal(
+      () => flushSync(() => setTheme((current) => (current === 'dark' ? 'light' : 'dark'))),
+      origin,
+      reduceMotion,
+    )
+  }
+
   return (
-    <div className="min-h-svh">
-      <a
-        href="#main"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-16 focus:left-16 focus:z-10 focus:inline-grid focus:h-control focus:place-items-center focus:rounded-lg focus:border focus:border-border focus:bg-card focus:px-16 focus:text-body-medium focus:text-fg"
-      >
-        Skip to content
-      </a>
-      <Header theme={theme} onToggleTheme={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
+    <MotionProvider>
+      <div className="min-h-svh">
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-16 focus:left-16 focus:z-10 focus:inline-grid focus:h-control focus:place-items-center focus:rounded-lg focus:border focus:border-border focus:bg-card focus:px-16 focus:text-body-medium focus:text-fg"
+        >
+          Skip to content
+        </a>
+        <Header theme={theme} onToggleTheme={toggleTheme} />
 
-      <main id="main" className="mx-auto max-w-page px-16 pb-72 sm:px-24 md:px-32">
-        <section className="relative isolate pt-64">
-          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-grid" />
-          <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-glow" />
-          <p className="font-mono text-eyebrow uppercase text-muted">Design tokens</p>
-          <h1 className="mt-16 text-display-sm text-fg sm:text-display-lg lg:text-display-xl">
-            Small surface. <span className="text-muted">Solid foundations.</span>
-          </h1>
-          <p className="mt-20 max-w-lead text-lead text-muted">
-            Every colour, type size, space, radius and elevation on this page comes from one token
-            file. Dark is the default; toggle the light theme to check both.
-          </p>
-        </section>
-
-        <div className="mt-72">
-          <Section
-            id="colour"
-            eyebrow="Colour"
-            title="Quiet surfaces. One accent."
-            intro="The product layer stays neutral: hairlines, one soft elevation and colour only from the accent a product picks and from status."
-          >
-            <h3 className="mt-32 text-title text-fg">Surfaces</h3>
-            <SwatchList tokens={surfaceFills} />
-
-            <h3 className="mt-40 text-title text-fg">Text on surfaces</h3>
-            <SwatchList tokens={textTokens} />
-
-            <h3 className="mt-40 text-title text-fg">Brand layer</h3>
-            <p className="mt-6 max-w-intro text-small text-muted">
-              Brand colours belong to the logo and the landing page. Never use them inside a
-              component.
+        <main id="main" className="mx-auto max-w-page px-16 pb-72 sm:px-24 md:px-32">
+          <section className="relative isolate pt-64">
+            <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-grid" />
+            <div aria-hidden="true" className="absolute inset-0 -z-10 bg-hero-glow" />
+            <p className="font-mono text-eyebrow uppercase text-muted">Design tokens</p>
+            <h1 className="mt-16 text-display-sm text-fg sm:text-display-lg lg:text-display-xl">
+              Small surface. <span className="text-muted">Solid foundations.</span>
+            </h1>
+            <p className="mt-20 max-w-lead text-lead text-muted">
+              Every colour, type size, space, radius and elevation on this page comes from one token
+              file. Dark is the default; toggle the light theme to check both.
             </p>
-            <SwatchList tokens={brandFills} />
+          </section>
 
-            <h3 className="mt-40 text-title text-fg">Status</h3>
-            <p className="mt-6 max-w-intro text-small text-muted">
-              Status always carries a word, never colour alone. The soft badge texts fail contrast
-              in light and are kept exact from the source; use the solid fill there.
-            </p>
-            <SwatchList tokens={statusFills} />
+          <div className="mt-72">
+            <Section
+              id="colour"
+              eyebrow="Colour"
+              title="Quiet surfaces. One accent."
+              intro="The product layer stays neutral: hairlines, one soft elevation and colour only from the accent a product picks and from status."
+            >
+              <h3 className="mt-32 text-title text-fg">Surfaces</h3>
+              <SwatchList tokens={surfaceFills} />
 
-            <h3 className="mt-40 text-title text-fg">Theme accents</h3>
-            <p className="mt-6 max-w-intro text-small text-muted">
-              A product picks one accent, or stays neutral with the inverted fill.
-            </p>
-            <SwatchList tokens={accentFills} />
-          </Section>
-        </div>
+              <h3 className="mt-40 text-title text-fg">Text on surfaces</h3>
+              <SwatchList tokens={textTokens} />
 
-        <div className="mt-72">
-          <Section
-            id="typography"
-            eyebrow="Typography"
-            title="Readable APIs. Predictable results."
-            intro="Geist carries the interface, Geist Mono carries code and labels, and Sora 800 is only ever the wordmark."
-          >
-            <div className="mt-32 border-t border-border">
-              {typeStyles.map((style) => (
-                <div key={style.name} className="border-b border-border py-20">
-                  <p className="font-mono text-caption text-muted">
-                    {style.name} · {style.role}
-                  </p>
-                  <p className={`mt-6 ${style.className}`}>{style.sample}</p>
-                </div>
-              ))}
-            </div>
-          </Section>
-        </div>
-
-        <div className="mt-72">
-          <Section
-            id="spacing"
-            eyebrow="Spacing"
-            title="A 1px rhythm. Nothing off-scale."
-            intro="Gutters, section padding, card padding and control gaps all come from the same pixel scale."
-          >
-            <ul className="mt-32">
-              {spacingScale.map((step) => (
-                <li
-                  key={step.name}
-                  className="grid grid-flow-col auto-cols-max items-center gap-16 border-b border-border py-10"
-                >
-                  <span className="w-72 shrink-0 font-mono text-caption text-muted">
-                    {step.name}
-                  </span>
-                  <div aria-hidden="true" className={`h-8 shrink-0 rounded-xs bg-fg ${step.bar}`} />
-                </li>
-              ))}
-            </ul>
-          </Section>
-        </div>
-
-        <div className="mt-72">
-          <Section
-            id="radii"
-            eyebrow="Radii"
-            title="Small surface. Soft edges."
-            intro="One radius scale; large containers stick to radius-2xl, controls to radius-lg."
-          >
-            <ul className="mt-32 grid grid-cols-2 gap-12 sm:grid-cols-3 lg:grid-cols-4">
-              {radii.map((radius) => (
-                <li key={radius.name} className="rounded-2xl border border-border bg-card p-22">
-                  <div
-                    aria-hidden="true"
-                    className={`size-64 border border-border bg-subtle ${radius.box}`}
-                  />
-                  <p className="mt-14 font-mono text-caption text-fg">{radius.name}</p>
-                </li>
-              ))}
-            </ul>
-          </Section>
-        </div>
-
-        <div className="mt-72">
-          <Section
-            id="elevation"
-            eyebrow="Elevation"
-            title="Flat, with one exception."
-            intro="Everything sits on the page with a hairline. Only things that genuinely float take the one shadow."
-          >
-            <div className="mt-32 max-w-intro rounded-2xl border border-border bg-card p-22 shadow-float">
-              <p className="text-title text-fg">shadow-float</p>
-              <p className="mt-6 text-small text-muted">
-                Install box, code panel, toast and the theming preview card. Nothing else.
+              <h3 className="mt-40 text-title text-fg">Brand layer</h3>
+              <p className="mt-6 max-w-intro text-small text-muted">
+                Brand colours belong to the logo and the landing page. Never use them inside a
+                component.
               </p>
-            </div>
-          </Section>
-        </div>
+              <SwatchList tokens={brandFills} />
 
-        <div className="mt-72">
-          <Section
-            id="layout"
-            eyebrow="Layout and motion"
-            title="Mobile first. Motion on a budget."
-            intro="Layout starts on the phone and scales up; motion is short, functional and removed when the reader asks for less."
-          >
-            <h3 className="mt-32 text-title text-fg">Layout</h3>
-            <TokenRows rows={layoutTokens} />
+              <h3 className="mt-40 text-title text-fg">Status</h3>
+              <p className="mt-6 max-w-intro text-small text-muted">
+                Status always carries a word, never colour alone. The soft badge texts fail contrast
+                in light and are kept exact from the source; use the solid fill there.
+              </p>
+              <SwatchList tokens={statusFills} />
 
-            <h3 className="mt-40 text-title text-fg">Motion</h3>
-            <TokenRows rows={motionTokens} />
-            <p className="mt-14 max-w-intro text-small text-muted">
-              With prefers-reduced-motion the three durations become zero; no animation runs.
-            </p>
-          </Section>
-        </div>
-      </main>
+              <h3 className="mt-40 text-title text-fg">Theme accents</h3>
+              <p className="mt-6 max-w-intro text-small text-muted">
+                A product picks one accent, or stays neutral with the inverted fill.
+              </p>
+              <SwatchList tokens={accentFills} />
+            </Section>
+          </div>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto max-w-page px-16 py-24 text-caption text-muted sm:px-24 md:px-32">
-          Token specimen · aster-ik · dark is the default theme
-        </div>
-      </footer>
-    </div>
+          <div className="mt-72">
+            <Section
+              id="typography"
+              eyebrow="Typography"
+              title="Readable APIs. Predictable results."
+              intro="Geist carries the interface, Geist Mono carries code and labels, and Sora 800 is only ever the wordmark."
+            >
+              <div className="mt-32 border-t border-border">
+                {typeStyles.map((style) => (
+                  <div key={style.name} className="border-b border-border py-20">
+                    <p className="font-mono text-caption text-muted">
+                      {style.name} · {style.role}
+                    </p>
+                    <p className={`mt-6 ${style.className}`}>{style.sample}</p>
+                  </div>
+                ))}
+              </div>
+            </Section>
+          </div>
+
+          <div className="mt-72">
+            <Section
+              id="spacing"
+              eyebrow="Spacing"
+              title="A 1px rhythm. Nothing off-scale."
+              intro="Gutters, section padding, card padding and control gaps all come from the same pixel scale."
+            >
+              <ul className="mt-32">
+                {spacingScale.map((step) => (
+                  <li
+                    key={step.name}
+                    className="grid grid-flow-col auto-cols-max items-center gap-16 border-b border-border py-10"
+                  >
+                    <span className="w-72 shrink-0 font-mono text-caption text-muted">
+                      {step.name}
+                    </span>
+                    <div
+                      aria-hidden="true"
+                      className={`h-8 shrink-0 rounded-xs bg-fg ${step.bar}`}
+                    />
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          </div>
+
+          <div className="mt-72">
+            <Section
+              id="radii"
+              eyebrow="Radii"
+              title="Small surface. Soft edges."
+              intro="One radius scale; large containers stick to radius-2xl, controls to radius-lg."
+            >
+              <ul className="mt-32 grid grid-cols-2 gap-12 sm:grid-cols-3 lg:grid-cols-4">
+                {radii.map((radius) => (
+                  <li key={radius.name} className="rounded-2xl border border-border bg-card p-22">
+                    <div
+                      aria-hidden="true"
+                      className={`size-64 border border-border bg-subtle ${radius.box}`}
+                    />
+                    <p className="mt-14 font-mono text-caption text-fg">{radius.name}</p>
+                  </li>
+                ))}
+              </ul>
+            </Section>
+          </div>
+
+          <div className="mt-72">
+            <Section
+              id="elevation"
+              eyebrow="Elevation"
+              title="Flat, with one exception."
+              intro="Everything sits on the page with a hairline. Only things that genuinely float take the one shadow."
+            >
+              <div className="mt-32 max-w-intro rounded-2xl border border-border bg-card p-22 shadow-float">
+                <p className="text-title text-fg">shadow-float</p>
+                <p className="mt-6 text-small text-muted">
+                  Install box, code panel, toast and the theming preview card. Nothing else.
+                </p>
+              </div>
+            </Section>
+          </div>
+
+          <div className="mt-72">
+            <Section
+              id="layout"
+              eyebrow="Layout and motion"
+              title="Mobile first. Motion on a budget."
+              intro="Layout starts on the phone and scales up; motion is short, functional and removed when the reader asks for less."
+            >
+              <h3 className="mt-32 text-title text-fg">Layout</h3>
+              <TokenRows rows={layoutTokens} />
+
+              <h3 className="mt-40 text-title text-fg">Motion</h3>
+              <TokenRows rows={motionTokens} />
+              <p className="mt-14 max-w-intro text-small text-muted">
+                With prefers-reduced-motion the three durations become zero; no animation runs.
+              </p>
+            </Section>
+          </div>
+        </main>
+
+        <footer className="border-t border-border">
+          <div className="mx-auto max-w-page px-16 py-24 text-caption text-muted sm:px-24 md:px-32">
+            Token specimen · aster-ik · dark is the default theme
+          </div>
+        </footer>
+      </div>
+    </MotionProvider>
   )
 }
 

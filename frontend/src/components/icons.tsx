@@ -41,22 +41,6 @@ export function MoonIcon({ className }: IconProps) {
   )
 }
 
-export function MenuIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
-      <path d="M4 9h16M4 15h16" />
-    </svg>
-  )
-}
-
-export function CloseIcon({ className }: IconProps) {
-  return (
-    <svg viewBox="0 0 24 24" className={className} {...strokeProps}>
-      <path d="M18 6 6 18M6 6l12 12" />
-    </svg>
-  )
-}
-
 export function GitHubIcon({ className }: IconProps) {
   return (
     <svg

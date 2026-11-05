@@ -1,11 +1,22 @@
-import { fireEvent, render, screen, within } from '@testing-library/react'
+import {
+  fireEvent,
+  render,
+  screen,
+  waitForElementToBeRemoved,
+  within,
+} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { MotionProvider } from '../../motion/MotionProvider'
 import { Header } from './Header'
 
 function renderHeader(theme: 'dark' | 'light' = 'dark') {
   const onToggleTheme = vi.fn()
-  render(<Header theme={theme} onToggleTheme={onToggleTheme} />)
+  render(
+    <MotionProvider>
+      <Header theme={theme} onToggleTheme={onToggleTheme} />
+    </MotionProvider>,
+  )
   return { onToggleTheme }
 }
 
@@ -112,7 +123,9 @@ describe('Header', () => {
 
     await user.keyboard('{Escape}')
 
-    expect(mobileMenu()).not.toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByRole('navigation', { name: 'Mobile' }), {
+      timeout: 3000,
+    })
     expect(screen.getByRole('button', { name: 'Open menu' })).toHaveAttribute(
       'aria-expanded',
       'false',
@@ -126,7 +139,9 @@ describe('Header', () => {
 
     await user.click(within(mobileMenu()!).getByRole('link', { name: 'Docs' }))
 
-    expect(mobileMenu()).not.toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByRole('navigation', { name: 'Mobile' }), {
+      timeout: 3000,
+    })
   })
 
   it('moves from the mobile menu into search', async () => {
@@ -136,7 +151,9 @@ describe('Header', () => {
 
     await user.click(within(mobileMenu()!).getByRole('button', { name: 'Search docs' }))
 
-    expect(mobileMenu()).not.toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByRole('navigation', { name: 'Mobile' }), {
+      timeout: 3000,
+    })
     expect(screen.getByRole('dialog', { name: 'Search this page' })).toBeInTheDocument()
   })
 })
