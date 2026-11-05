@@ -201,6 +201,22 @@ describe('AccountCard', () => {
     expect(screen.getByRole('status')).toBeEmptyDOMElement()
   })
 
+  it('keeps the paper-plane celebration long enough to watch it draw', () => {
+    vi.useFakeTimers()
+    renderAccount()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Magic link' }))
+    act(() => vi.advanceTimersByTime(300))
+    fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'mira@example.com' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Send magic link' }))
+
+    act(() => vi.advanceTimersByTime(1600))
+    expect(overlay()?.querySelector('[data-success="plane"]')).not.toBeNull()
+    expect(loadingBeat()).toBeNull()
+
+    act(() => vi.advanceTimersByTime(800))
+    expect(loadingBeat()).not.toBeNull()
+  })
   it('still runs the celebration and loading beats under reduced motion', () => {
     setPrefersReducedMotion(true)
     vi.useFakeTimers()
