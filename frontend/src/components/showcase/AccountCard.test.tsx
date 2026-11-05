@@ -1,6 +1,6 @@
-import { render, screen, waitForElementToBeRemoved } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MotionProvider } from '../../motion/MotionProvider'
 import { setPrefersReducedMotion } from '../../test/match-media'
 import { AccountCard } from './AccountCard'
@@ -17,8 +17,18 @@ const passwordField = () => screen.queryByLabelText('Password')
 const magicNote = () => screen.queryByText(/one-time link/i)
 
 afterEach(() => {
+  vi.useRealTimers()
   setPrefersReducedMotion(false)
 })
+
+const overlay = () => document.querySelector('[data-success-overlay]')
+const loadingBeat = () => document.querySelector('[data-success-loading]')
+
+function submitPasswordSuccess() {
+  fireEvent.change(screen.getByLabelText('Email'), { target: { value: 'mira@example.com' } })
+  fireEvent.change(screen.getByLabelText('Password'), { target: { value: 'supersecret' } })
+  fireEvent.click(screen.getByRole('button', { name: 'Create account' }))
+}
 
 describe('AccountCard', () => {
   it('starts on the password form', () => {
@@ -148,19 +158,64 @@ describe('AccountCard', () => {
     expect(document.querySelector('[data-success]')).toBeNull()
   })
 
-  it('clears the celebration when the reader switches methods', async () => {
+  it('covers the whole card with the celebration overlay', async () => {
     const user = userEvent.setup()
     renderAccount()
 
     await user.type(screen.getByLabelText('Email'), 'mira@example.com')
     await user.type(screen.getByLabelText('Password'), 'supersecret')
     await user.click(screen.getByRole('button', { name: 'Create account' }))
-    expect(document.querySelector('[data-success="lock"]')).not.toBeNull()
 
-    await user.click(screen.getByRole('button', { name: 'Password' }))
-    await waitForElementToBeRemoved(() => document.querySelector('[data-success]'))
-    expect(document.querySelector('[data-success]')).toBeNull()
+    const cover = overlay()
+    expect(cover).not.toBeNull()
+    expect(cover?.closest('section')).toBe(
+      screen.getByRole('heading', { name: 'Create an account' }).closest('section'),
+    )
+    expect(cover?.querySelector('[data-success="lock"]')).not.toBeNull()
+    expect(screen.getByRole('button', { name: 'Create account' }).closest('form')).toHaveAttribute(
+      'inert',
+    )
   })
+
+  it('holds the celebration for at least a second, then shows a loading beat, then resets the form', () => {
+    vi.useFakeTimers()
+    renderAccount()
+    submitPasswordSuccess()
+
+    expect(overlay()).not.toBeNull()
+    expect(loadingBeat()).toBeNull()
+
+    act(() => vi.advanceTimersByTime(900))
+    expect(overlay()).not.toBeNull()
+    expect(loadingBeat()).toBeNull()
+
+    act(() => vi.advanceTimersByTime(600))
+    expect(overlay()).not.toBeNull()
+    expect(loadingBeat()).not.toBeNull()
+    expect(overlay()?.textContent).toMatch(/preparing your workspace/i)
+
+    act(() => vi.advanceTimersByTime(1600))
+    expect(overlay()).toBeNull()
+    expect(screen.getByLabelText('Email')).toHaveValue('')
+    expect(screen.getByLabelText('Password')).toHaveValue('')
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+  })
+
+  it('still runs the celebration and loading beats under reduced motion', () => {
+    setPrefersReducedMotion(true)
+    vi.useFakeTimers()
+    renderAccount()
+    submitPasswordSuccess()
+
+    expect(overlay()?.querySelector('[data-success="lock"]')).not.toBeNull()
+
+    act(() => vi.advanceTimersByTime(1500))
+    expect(loadingBeat()).not.toBeNull()
+
+    act(() => vi.advanceTimersByTime(1600))
+    expect(overlay()).toBeNull()
+  })
+
   it('reserves the status line so switching methods never resizes the form', async () => {
     const user = userEvent.setup()
     renderAccount()

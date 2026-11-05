@@ -36,6 +36,10 @@ export const dialogPanelVariants = {
 /* Success micro-animations: a padlock opening and a paper plane taking off.
    Body/ring settle in ~0.42s; the shackle lifts and swings on its hinge slightly
    later; the plane draws itself and then flies out along its trail. */
+/* Account success choreography: the celebration holds for at least a second,
+   then a loading beat, then the card returns to its form so it can be retried. */
+export const successCelebrateMs = 1400
+export const successLoadingMs = 1600
 export const lockTransition = { duration: 0.42, ease: appleEase }
 export const lockShackleTransition = { duration: 0.45, ease: appleEase, delay: 0.12 }
 export const lockBodyVariants = {
