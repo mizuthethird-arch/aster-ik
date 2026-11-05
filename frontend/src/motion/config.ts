@@ -33,6 +33,12 @@ export const dialogPanelVariants = {
   hidden: { opacity: 0, scale: 0.97, transition: dialogExitTransition },
   visible: { opacity: 1, scale: 1, transition: dialogTransition },
 }
+export const toastTransition = { duration: 0.18, ease: appleEase }
+export const toastExitTransition = { duration: 0.12, ease: appleEase }
+export const toastVariants = {
+  hidden: { opacity: 0, y: 8, transition: toastExitTransition },
+  visible: { opacity: 1, y: 0, transition: toastTransition },
+}
 export const iconSpring = { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.7 }
 
 /*

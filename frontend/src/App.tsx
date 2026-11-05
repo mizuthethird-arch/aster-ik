@@ -3,6 +3,7 @@ import { flushSync } from 'react-dom'
 
 import { Hero } from './components/landing/Hero'
 import { Header } from './components/layout/Header'
+import { Playground } from './components/showcase/Playground'
 import { MotionProvider } from './motion/MotionProvider'
 import { startThemeReveal } from './motion/theme-reveal'
 import type { RevealOrigin } from './motion/theme-reveal'
@@ -378,6 +379,9 @@ function App() {
     else root.removeAttribute('data-theme')
   }, [theme])
 
+  const toggleThemeFromCenter = () =>
+    toggleTheme({ x: window.innerWidth / 2, y: window.innerHeight / 3 })
+
   const toggleTheme = (origin: RevealOrigin) => {
     /* The next theme is revealed by a circle growing out of the toggle. */
     startThemeReveal(
@@ -400,6 +404,8 @@ function App() {
 
         <main id="main">
           <Hero />
+
+          <Playground onToggleTheme={toggleThemeFromCenter} />
 
           <div id="docs" className="mx-auto max-w-page px-16 pb-72 sm:px-24 md:px-32">
             <div className="mt-72">
