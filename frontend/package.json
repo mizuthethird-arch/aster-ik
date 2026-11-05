@@ -5,11 +5,11 @@
   "type": "module",
   "packageManager": "pnpm@12.16.1",
   "engines": {
-    "node": "\u003e=22.23.4"
+    "node": ">=22.23.4"
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b \u0026\u0026 vite build",
+    "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0 --port 4173",
     "typecheck": "tsc -b",
     "lint": "eslint .",
@@ -20,6 +20,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "motion": "14.9.0",
     "react": "19.3.1",
     "react-dom": "19.3.1"
   },

@@ -1,4 +1,8 @@
 import { useEffect, useState } from 'react'
+import { AnimatePresence, m } from 'motion/react'
+import type { Variants } from 'motion/react'
+import { iconSpring, menuExitTransition, menuTransition } from '../../motion/config'
+import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { Mark } from '../brand/Mark'
 import { CloseIcon, GitHubIcon, MenuIcon, MoonIcon, SearchIcon, SunIcon } from '../icons'
 import { SearchPalette } from './SearchPalette'
@@ -17,9 +21,49 @@ const navLinks = [
 const iconButton =
   'size-control-icon place-items-center rounded-md text-muted transition-ui hover:bg-subtle hover:text-fg'
 
+/* The menu grows and fades in; it shrinks and fades out faster than it opened. */
+const menuVariants: Variants = {
+  closed: { height: 0, opacity: 0, y: -8, transition: menuExitTransition },
+  open: { height: 'auto', opacity: 1, y: 0, transition: menuTransition },
+}
+
+const menuClass = 'grid gap-2 overflow-hidden border-t border-border px-16 pt-8 pb-16 md:hidden'
+
+function MobileMenuContent({
+  onNavigate,
+  onSearch,
+}: {
+  onNavigate: () => void
+  onSearch: () => void
+}) {
+  return (
+    <>
+      <button
+        type="button"
+        onClick={onSearch}
+        className="grid h-control grid-flow-col auto-cols-max items-center gap-8 rounded-md px-8 text-body text-muted transition-ui hover:bg-subtle hover:text-fg"
+      >
+        <SearchIcon className="size-16" />
+        Search docs
+      </button>
+      {navLinks.map((link) => (
+        <a
+          key={link.href}
+          href={link.href}
+          onClick={onNavigate}
+          className="grid h-control items-center rounded-md px-8 text-body text-muted transition-ui hover:bg-subtle hover:text-fg"
+        >
+          {link.label}
+        </a>
+      ))}
+    </>
+  )
+}
+
 export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: () => void }) {
   const [menuOpen, setMenuOpen] = useState(false)
   const [paletteOpen, setPaletteOpen] = useState(false)
+  const reduceMotion = usePrefersReducedMotion()
 
   /* Escape closes the mobile menu; the palette closes itself (native dialog). */
   useEffect(() => {
@@ -42,6 +86,16 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [])
+
+  const menuContent = (
+    <MobileMenuContent
+      onNavigate={() => setMenuOpen(false)}
+      onSearch={() => {
+        setMenuOpen(false)
+        setPaletteOpen(true)
+      }}
+    />
+  )
 
   return (
     <header className="sticky top-0 z-10 border-b border-border bg-header backdrop-blur-header">
@@ -105,7 +159,22 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
             aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
             className={`grid ${iconButton}`}
           >
-            {theme === 'dark' ? <SunIcon className="size-20" /> : <MoonIcon className="size-20" />}
+            <AnimatePresence initial={false}>
+              <m.span
+                key={theme}
+                className="col-start-1 row-start-1 grid place-items-center"
+                initial={{ opacity: 0, rotate: -90, scale: 0.6 }}
+                animate={{ opacity: 1, rotate: 0, scale: 1 }}
+                exit={{ opacity: 0, rotate: 90, scale: 0.6 }}
+                transition={iconSpring}
+              >
+                {theme === 'dark' ? (
+                  <SunIcon className="size-20" />
+                ) : (
+                  <MoonIcon className="size-20" />
+                )}
+              </m.span>
+            </AnimatePresence>
           </button>
 
           <button
@@ -121,35 +190,31 @@ export function Header({ theme, onToggleTheme }: { theme: Theme; onToggleTheme: 
         </div>
       </div>
 
-      {menuOpen ? (
-        <nav
-          id="mobile-nav"
-          aria-label="Mobile"
-          className="grid gap-2 border-t border-border px-16 pt-8 pb-16 md:hidden"
-        >
-          <button
-            type="button"
-            onClick={() => {
-              setMenuOpen(false)
-              setPaletteOpen(true)
-            }}
-            className="grid h-control grid-flow-col auto-cols-max items-center gap-8 rounded-md px-8 text-body text-muted transition-ui hover:bg-subtle hover:text-fg"
-          >
-            <SearchIcon className="size-16" />
-            Search docs
-          </button>
-          {navLinks.map((link) => (
-            <a
-              key={link.href}
-              href={link.href}
-              onClick={() => setMenuOpen(false)}
-              className="grid h-control items-center rounded-md px-8 text-body text-muted transition-ui hover:bg-subtle hover:text-fg"
+      {reduceMotion ? (
+        menuOpen ? (
+          <nav id="mobile-nav" aria-label="Mobile" className={menuClass}>
+            {menuContent}
+          </nav>
+        ) : null
+      ) : (
+        <AnimatePresence initial={false}>
+          {menuOpen ? (
+            <m.nav
+              key="mobile-nav"
+              id="mobile-nav"
+              aria-label="Mobile"
+              data-testid="mobile-menu"
+              className={menuClass}
+              variants={menuVariants}
+              initial="closed"
+              animate="open"
+              exit="closed"
             >
-              {link.label}
-            </a>
-          ))}
-        </nav>
-      ) : null}
+              {menuContent}
+            </m.nav>
+          ) : null}
+        </AnimatePresence>
+      )}
 
       <SearchPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </header>
