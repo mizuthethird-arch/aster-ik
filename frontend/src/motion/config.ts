@@ -39,6 +39,18 @@ export const toastVariants = {
   hidden: { opacity: 0, y: 8, transition: toastExitTransition },
   visible: { opacity: 1, y: 0, transition: toastTransition },
 }
+/* Swapping one state for another inside a fixed-height slot (password field ↔
+   magic-link note): the old content fades and rises out, the new content fades
+   and rises in. Height is reserved outside, so the card never resizes. */
+export const fieldSwapTransition = { duration: 0.2, ease: appleEase }
+export const fieldSwapExitTransition = {
+  duration: 0.14,
+  ease: [0.4, 0, 1, 1] as [number, number, number, number],
+}
+export const fieldSwapVariants = {
+  hidden: { opacity: 0, y: 6, transition: fieldSwapExitTransition },
+  visible: { opacity: 1, y: 0, transition: fieldSwapTransition },
+}
 export const iconSpring = { type: 'spring' as const, stiffness: 420, damping: 30, mass: 0.7 }
 
 /*

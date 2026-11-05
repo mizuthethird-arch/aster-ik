@@ -1,4 +1,7 @@
+import { AnimatePresence, m } from 'motion/react'
 import { useState } from 'react'
+import { fieldSwapVariants } from '../../motion/config'
+import { usePrefersReducedMotion } from '../../motion/use-prefers-reduced-motion'
 import { Button } from '../ui/Button'
 import { Card } from '../ui/Card'
 import { Input } from '../ui/Input'
@@ -15,6 +18,7 @@ const modeOptions = [
 
 export function AccountCard({ className = '' }: { className?: string }) {
   const [mode, setMode] = useState<Mode>('password')
+  const reduceMotion = usePrefersReducedMotion()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({})
@@ -39,6 +43,23 @@ export function AccountCard({ className = '' }: { className?: string }) {
     )
     setPassword('')
   }
+
+  const slot =
+    mode === 'password' ? (
+      <Input
+        id="account-password"
+        label="Password"
+        type="password"
+        autoComplete="current-password"
+        value={password}
+        onChange={(event) => setPassword(event.target.value)}
+        error={errors.password}
+      />
+    ) : (
+      <p className="grid min-h-96 content-center rounded-input border border-border px-12 text-caption text-muted">
+        We email you a one-time link — no password needed.
+      </p>
+    )
 
   return (
     <Card
@@ -73,22 +94,26 @@ export function AccountCard({ className = '' }: { className?: string }) {
         />
 
         {/* Fixed-height slot: the password field and the magic-link note occupy
-            the same space, so switching methods never resizes the card. */}
-        <div className="min-h-96">
-          {mode === 'password' ? (
-            <Input
-              id="account-password"
-              label="Password"
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              error={errors.password}
-            />
+            the same space, so switching methods never resizes the card. The old
+            state fades and rises out before the new one rises in (instant when
+            the reader prefers reduced motion). */}
+        <div className="relative min-h-96">
+          {reduceMotion ? (
+            slot
           ) : (
-            <p className="grid min-h-96 content-center rounded-input border border-border px-12 text-caption text-muted">
-              We email you a one-time link — no password needed.
-            </p>
+            <AnimatePresence initial={false}>
+              <m.div
+                key={mode}
+                data-swap-slot=""
+                className="absolute inset-x-0 top-0"
+                variants={fieldSwapVariants}
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+              >
+                {slot}
+              </m.div>
+            </AnimatePresence>
           )}
         </div>
 

@@ -1,41 +1,73 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it } from 'vitest'
+import { MotionProvider } from '../../motion/MotionProvider'
+import { setPrefersReducedMotion } from '../../test/match-media'
 import { AccountCard } from './AccountCard'
+
+function renderAccount() {
+  render(
+    <MotionProvider>
+      <AccountCard />
+    </MotionProvider>,
+  )
+}
+
+const passwordField = () => screen.queryByLabelText('Password')
+const magicNote = () => screen.queryByText(/one-time link/i)
+
+afterEach(() => {
+  setPrefersReducedMotion(false)
+})
 
 describe('AccountCard', () => {
   it('starts on the password form', () => {
-    render(<AccountCard />)
+    renderAccount()
 
     expect(screen.getByRole('heading', { name: 'Create an account' })).toBeInTheDocument()
     expect(screen.getByLabelText('Email')).toHaveAttribute('type', 'email')
-    expect(screen.getByLabelText('Password')).toHaveAttribute('type', 'password')
+    expect(passwordField()).toHaveAttribute('type', 'password')
     expect(screen.getByRole('button', { name: 'Create account' })).toBeInTheDocument()
   })
 
   it('switches to the magic link form', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
     await user.click(screen.getByRole('button', { name: 'Magic link' }))
+    await waitForElementToBeRemoved(passwordField)
 
     expect(screen.queryByLabelText('Password')).not.toBeInTheDocument()
+    expect(magicNote()).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Send magic link' })).toBeInTheDocument()
   })
 
-  it('reserves the status line so switching methods never resizes the form', async () => {
+  it('animates the password field out instead of replacing it in the same frame', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
-    expect(screen.getByRole('status')).toBeEmptyDOMElement()
     await user.click(screen.getByRole('button', { name: 'Magic link' }))
 
-    expect(screen.getByText(/one-time link/i)).toBeInTheDocument()
-    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    // The exit owns the unmount: the field is still mounted right after the click.
+    expect(passwordField()).toBeInTheDocument()
+    await waitForElementToBeRemoved(passwordField, { timeout: 3000 })
+    expect(magicNote()).toBeInTheDocument()
   })
+
+  it('swaps the field instantly when the reader prefers reduced motion', async () => {
+    setPrefersReducedMotion(true)
+    const user = userEvent.setup()
+    renderAccount()
+
+    await user.click(screen.getByRole('button', { name: 'Magic link' }))
+
+    expect(passwordField()).not.toBeInTheDocument()
+    expect(magicNote()).toBeInTheDocument()
+  })
+
   it('reports an invalid email', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
     await user.type(screen.getByLabelText('Email'), 'nope')
     await user.click(screen.getByRole('button', { name: 'Create account' }))
@@ -46,7 +78,7 @@ describe('AccountCard', () => {
 
   it('requires a password of at least eight characters', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
     await user.type(screen.getByLabelText('Email'), 'mira@example.com')
     await user.type(screen.getByLabelText('Password'), 'short')
@@ -58,7 +90,7 @@ describe('AccountCard', () => {
 
   it('confirms account creation', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
     await user.type(screen.getByLabelText('Email'), 'mira@example.com')
     await user.type(screen.getByLabelText('Password'), 'supersecret')
@@ -69,12 +101,25 @@ describe('AccountCard', () => {
 
   it('confirms the magic link without a password', async () => {
     const user = userEvent.setup()
-    render(<AccountCard />)
+    renderAccount()
 
     await user.click(screen.getByRole('button', { name: 'Magic link' }))
+    await waitForElementToBeRemoved(passwordField)
     await user.type(screen.getByLabelText('Email'), 'mira@example.com')
     await user.click(screen.getByRole('button', { name: 'Send magic link' }))
 
     expect(screen.getByRole('status')).toHaveTextContent('Magic link sent to mira@example.com')
+  })
+
+  it('reserves the status line so switching methods never resizes the form', async () => {
+    const user = userEvent.setup()
+    renderAccount()
+
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
+    await user.click(screen.getByRole('button', { name: 'Magic link' }))
+    await waitForElementToBeRemoved(passwordField)
+
+    expect(magicNote()).toBeInTheDocument()
+    expect(screen.getByRole('status')).toBeEmptyDOMElement()
   })
 })
