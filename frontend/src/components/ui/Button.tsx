@@ -5,8 +5,8 @@ export type ButtonSize = 'sm' | 'default'
 
 const variantClasses: Record<ButtonVariant, string> = {
   default: 'bg-inv text-inv-fg hover:opacity-90',
-  secondary: 'bg-subtle text-fg hover:bg-border',
-  outline: 'border border-border bg-transparent text-fg hover:bg-subtle',
+  secondary: 'border border-border bg-transparent text-fg hover:bg-subtle',
+  outline: 'border border-fg/40 bg-transparent text-fg hover:bg-subtle',
   ghost: 'bg-transparent text-muted hover:bg-subtle hover:text-fg',
   destructive: 'bg-danger text-on-danger hover:opacity-90',
 }

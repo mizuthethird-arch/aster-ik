@@ -96,7 +96,7 @@ export function Hero() {
           </a>
           <a
             href="#components"
-            className="grid h-control-cta grid-flow-col auto-cols-max items-center justify-center rounded-lg border border-border bg-card px-20 text-body-medium text-fg transition-ui hover:bg-subtle sm:h-control"
+            className="grid h-control-cta grid-flow-col auto-cols-max items-center justify-center rounded-lg border border-border bg-transparent px-20 text-body-medium text-fg transition-ui hover:bg-subtle sm:h-control"
           >
             Browse components
           </a>
