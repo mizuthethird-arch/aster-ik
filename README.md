@@ -65,15 +65,19 @@ logical change per commit.
 | install | `pnpm install --frozen-lockfile` |
 | lint | `pnpm lint` |
 | typecheck | `pnpm typecheck` |
+| test | `pnpm test` (vitest) |
 | build | `pnpm build` |
 | format | `pnpm format:check` |
 | artifact | `frontend/dist` uploaded as `frontend-dist` (7 days) |
+
+All of these are inside the single required `verify` check, so **red tests block the merge** — a PR
+cannot land on `dev` or `main` while any of them fails.
 
 The same commands run locally inside the container:
 
 ```bash
 cd frontend
-docker compose run --rm frontend sh -lc 'pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm build && pnpm format:check'
+docker compose run --rm frontend sh -lc 'pnpm install --frozen-lockfile && pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm format:check'
 ```
 
 ## Test deploy (GitHub Pages)

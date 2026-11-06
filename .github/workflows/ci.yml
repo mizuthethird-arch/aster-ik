@@ -53,6 +53,11 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      # The unit/component suite must pass before anything can merge: this step is part of
+      # the required `verify` context, so red tests block the PR, not just show a warning.
+      - name: Test
+        run: pnpm test
+
       - name: Build
         run: pnpm build
 

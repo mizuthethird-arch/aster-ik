@@ -235,6 +235,11 @@
   --text-kbd: 11px;
   --text-kbd--line-height: 1.4;
   --text-kbd--font-weight: 500;
+  /* The input floor: iOS zooms any focused field below 16px. The brand body size
+     stays 14px on pointer:fine; touch pointers get this. */
+  --text-input: 16px;
+  --text-input--line-height: 1.5;
+  --text-input--font-weight: 400;
   --text-wordmark: 19px;
   --text-wordmark--line-height: 1;
   --text-wordmark--font-weight: 800;
@@ -266,6 +271,7 @@
   --spacing-header: 60px;
   --spacing-control: 40px;
   --spacing-control-sm: 32px;
+  --spacing-command-list: 168px;
   --spacing-control-icon: 36px;
   --spacing-control-cta: 44px;
   --spacing-input: 38px;
@@ -275,6 +281,8 @@
   --container-page: 1200px;
   --container-lead: 560px;
   --container-intro: 600px;
+  --container-install: 448px;
+  --container-headline: 900px;
 
   /* Breakpoints — brand guidelines §5 */
   --breakpoint-sm: 640px;
@@ -318,15 +326,6 @@
   :focus-visible {
     outline: 2px solid var(--aster-ik-fg);
     outline-offset: 2px;
-  }
-
-  /* Motion is short and functional; remove it entirely when asked. */
-  @media (prefers-reduced-motion: reduce) {
-    :root {
-      --aster-ik-motion-fast: 0ms;
-      --aster-ik-motion-medium: 0ms;
-      --aster-ik-motion-slow: 0ms;
-    }
   }
 }
 
@@ -411,4 +410,51 @@
 /* A scroll region that never reflows its contents when the scrollbar appears. */
 @utility scroll-gutter-stable {
   scrollbar-gutter: stable;
+}
+/* --- Touch input floor -------------------------------------------------- */
+
+/* iOS zooms any focused field under 16px. On touch pointers every text field
+   gets the input size, so tapping the field never zooms the page. Unlayered on
+   purpose: it must win over component text utilities. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: var(--text-input);
+    line-height: var(--text-input--line-height);
+    font-weight: var(--text-input--font-weight);
+  }
+}
+/* --- Reduced motion ------------------------------------------------------ */
+
+/* Remove motion entirely when asked. Unlayered on purpose: the raw values live
+   in an unlayered `:root`, so an override inside @layer base would lose the
+   cascade and every CSS transition would still run. */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --aster-ik-motion-fast: 0ms;
+    --aster-ik-motion-medium: 0ms;
+    --aster-ik-motion-slow: 0ms;
+  }
+}
+/* --- Sliding selection surface ------------------------------------------ */
+
+/* One inverted pill slides between options with an Apple-style decelerating
+   spring: a linear() curve with a ~1.5% overshoot at the end. Duration and
+   easing ride the motion tokens, so prefers-reduced-motion makes it instant. */
+@utility slide-surface {
+  transition: transform var(--aster-ik-motion-slow)
+    linear(0, 0.22 10%, 0.55 25%, 0.83 42%, 0.96 58%, 1.015 72%, 1 100%);
+  will-change: transform;
+}
+/* --- Blend labels over a moving selection surface ----------------------- */
+
+/* Labels sit above the sliding inverted pill with a pure-white colour and
+   `difference` blending: over the page they render light, over the pill dark —
+   per pixel, with no colour transition, so a moving pill never leaves a blank
+   surface or a washed-out label behind. Pure white is required for the blend
+   maths; the rendered colour always comes from the backdrop. */
+@utility blend-label {
+  color: #fff;
+  mix-blend-mode: difference;
 }

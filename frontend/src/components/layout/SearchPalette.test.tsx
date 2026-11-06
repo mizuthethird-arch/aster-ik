@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { useState } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { MotionProvider } from '../../motion/MotionProvider'
-import { setPrefersReducedMotion } from '../../test/match-media'
+import { setCoarsePointer, setPrefersReducedMotion } from '../../test/match-media'
 import { SearchPalette } from './SearchPalette'
 
 function renderPalette(open = true) {
@@ -53,12 +53,35 @@ describe('SearchPalette', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })
 
-  it('opens, labels itself and focuses the search field', () => {
+  it('opens and labels itself without focusing the search field', () => {
     renderPalette()
 
     expect(dialog().open).toBe(true)
     expect(screen.getByRole('dialog', { name: 'Search this page' })).toBeInTheDocument()
-    expect(screen.getByRole('searchbox', { name: 'Search this page' })).toHaveFocus()
+    expect(screen.getByRole('searchbox', { name: 'Search this page' })).not.toHaveFocus()
+    expect(dialog()).toHaveFocus()
+  })
+
+  it('shows a minimal focus border instead of a ring or a glow', () => {
+    renderPalette()
+
+    const input = screen.getByRole('searchbox')
+    expect(input).toHaveClass(
+      'border',
+      'border-border',
+      'focus-visible:border-fg',
+      'focus-visible:outline-none',
+    )
+    expect(input).not.toHaveClass('field-focus')
+  })
+  it('moves focus into the field on the first Tab', async () => {
+    const user = userEvent.setup()
+    renderPalette()
+    expect(dialog()).toHaveFocus()
+
+    await user.tab()
+
+    expect(screen.getByRole('searchbox')).toHaveFocus()
   })
 
   it('lists every section with its anchor', () => {
@@ -155,6 +178,13 @@ describe('SearchPalette', () => {
     await waitFor(() => expect(dialog().open).toBe(false), { timeout: 3000 })
   })
 
+  it('keeps focus out of the field on touch devices, so opening never zooms', () => {
+    setCoarsePointer(true)
+    renderPalette()
+
+    expect(screen.getByRole('searchbox')).not.toHaveFocus()
+    expect(dialog()).toHaveFocus()
+  })
   it('locks the page scroll while the dialog is open', async () => {
     const user = userEvent.setup()
     renderInteractivePalette()

@@ -29,8 +29,9 @@ function setScrollLock(locked: boolean) {
 }
 
 /*
- * The panel mounts per opening, so every search starts empty and the field
- * takes focus through the dialog's autofocus, without a state-syncing effect.
+ * The panel mounts per opening, so every search starts empty. Nothing focuses
+ * the field: the modal opens without autofocus, the way a sheet should, and the
+ * reader can Tab or tap into the field when they want to search.
  */
 function SearchPanel({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState('')
@@ -45,12 +46,11 @@ function SearchPanel({ onClose }: { onClose: () => void }) {
         <SearchIcon className="size-16 text-muted" />
         <input
           type="search"
-          autoFocus
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           placeholder="Search this page…"
           aria-label="Search this page"
-          className="h-control w-full rounded-input bg-transparent px-8 text-body text-fg placeholder:text-muted"
+          className="h-control w-full rounded-input border border-border bg-transparent px-8 text-body text-fg transition-ui placeholder:text-muted focus-visible:border-fg focus-visible:outline-none"
         />
       </div>
 
@@ -98,6 +98,9 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       dialog.close()
       setScrollLock(false)
     }
+    /* Keep focus inside the modal without focusing the field: the browser focuses
+       the first focusable descendant on showModal, so the dialog takes it back. */
+    if (open) dialog.focus()
   }, [open, reduceMotion])
 
   /* Never leave the page locked if the palette unmounts mid-open. */
@@ -148,7 +151,8 @@ export function SearchPalette({ open, onClose }: { open: boolean; onClose: () =>
       onKeyDown={handleKeyDown}
       onClick={handleDialogClick}
       aria-label="Search this page"
-      className="m-auto w-full border-0 bg-transparent p-0 text-fg backdrop:bg-bg/80 sm:max-w-intro"
+      tabIndex={-1}
+      className="m-auto w-full border-0 bg-transparent p-0 text-fg outline-none backdrop:bg-bg/80 sm:max-w-intro"
     >
       {reduceMotion ? (
         open ? (
