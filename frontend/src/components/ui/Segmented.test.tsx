@@ -40,14 +40,36 @@ describe('Segmented', () => {
     ).toBe('translateX(100%)')
   })
 
-  it('marks the active option pressed and keeps labels blended over the moving pill', () => {
-    render(<Harness />)
+  it('paints labels twice and clips the inverted copy to the pill', () => {
+    const { container } = render(<Harness />)
 
     expect(screen.getByRole('button', { name: 'A' })).toHaveAttribute('aria-pressed', 'true')
 
-    const { container } = render(<Harness />)
     const labels = container.querySelectorAll('.blend-label')
     expect(labels).toHaveLength(2)
     expect(labels[0]).toHaveClass('blend-label')
+
+    const inverseLabels = container.querySelectorAll('.blend-label-inverse')
+    expect(inverseLabels).toHaveLength(2)
+
+    const inverse = container.querySelector<HTMLElement>('[data-segmented-inverse]')
+    expect(inverse).not.toBeNull()
+    // The inverted layer is clipped to the pill; no blend mode is involved.
+    expect(inverse?.getAttribute('style')).toContain('clip-path')
+  })
+
+  it('moves the label clip with the pill instead of re-colouring the text', async () => {
+    const user = userEvent.setup()
+    const { container } = render(<Harness />)
+
+    const clip = () =>
+      container.querySelector<HTMLElement>('[data-segmented-inverse]')?.getAttribute('style')
+    const before = clip()
+
+    await user.click(screen.getByRole('button', { name: 'B' }))
+
+    const after = clip()
+    expect(after).not.toBe(before)
+    expect(after).toContain('* 2')
   })
 })

@@ -447,14 +447,28 @@
     linear(0, 0.22 10%, 0.55 25%, 0.83 42%, 0.96 58%, 1.015 72%, 1 100%);
   will-change: transform;
 }
-/* --- Blend labels over a moving selection surface ----------------------- */
+/* --- Labels over the sliding selection surface --------------------------- */
 
-/* Labels sit above the sliding inverted pill with a pure-white colour and
-   `difference` blending: over the page they render light, over the pill dark —
-   per pixel, with no colour transition, so a moving pill never leaves a blank
-   surface or a washed-out label behind. Pure white is required for the blend
-   maths; the rendered colour always comes from the backdrop. */
+/* Labels sit above the sliding inverted pill. They are painted twice, in the
+   page colour and in the inverted colour, and the inverted copy is clipped to
+   the pill's exact rectangle (see Segmented). The first version used a single
+   pure-white label with `mix-blend-mode: difference`; Safari mis-composites
+   that inside an isolated, GPU-composited group and leaves the glyphs white, so
+   the active label disappeared into the white pill. No blend mode is involved
+   any more, which makes the result identical on every engine. */
 @utility blend-label {
-  color: #fff;
-  mix-blend-mode: difference;
+  color: var(--aster-ik-fg);
+}
+
+/* The copy that is only visible over the inverted pill. */
+@utility blend-label-inverse {
+  color: var(--aster-ik-inv-fg);
+}
+
+/* Clip that travels with the pill, on the same spring, so the text swap never
+   lags behind the surface it is measuring against. */
+@utility slide-clip {
+  transition: clip-path var(--aster-ik-motion-slow)
+    linear(0, 0.22 10%, 0.55 25%, 0.83 42%, 0.96 58%, 1.015 72%, 1 100%);
+  will-change: clip-path;
 }
