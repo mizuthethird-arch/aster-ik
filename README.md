@@ -38,18 +38,25 @@ Rules — identical on `main` and `dev`:
 | Direct pushes | not allowed on `main` or `dev` — every change arrives through a PR |
 | PR base | feature → `dev`; promotion → `main` (from `dev` only) |
 | Required check | `verify` (CI green before merge) |
-| Merge method | squash merge, one commit per PR |
+| Merge method | **feature PRs squash** into `dev`; **promotions merge-commit** into `main` |
 | Branch after merge | feature branches deleted after merge; `dev` is never deleted |
 | Force-push / branch deletion | disabled on both protected branches |
-| History | linear, conversation resolution required |
+| History | `dev` stays linear (squashes only); `main` carries one merge commit per promotion |
 | Required reviews | 0 while the team is one person; raise to 1 when a second committer joins |
 
 > Repository setting `delete_branch_on_merge` is **off** on purpose: the promotion PR's head is
 > `dev`, so an automatic delete would destroy the integration branch. Feature branches are deleted
 > explicitly when their PR is merged (`gh pr merge --squash --delete-branch`).
 
-Promotion is a deliberate step, never a fast-forward: when `dev` is verified on the test site, open
-a PR from `dev` into `main`, let `verify` run again, squash-merge, then tag `vX.Y.Z` from `main`.
+Promotion is a deliberate step: when `dev` is verified on the test site, open a PR from `dev` into
+`main`, let `verify` run again, and **merge it with a merge commit** (`gh pr merge --merge`), then
+tag `vX.Y.Z` from `main`.
+
+Why a merge commit, not a squash: squash-only promotions leave `main` holding snapshots that share
+no history with `dev`, so every later promotion conflicted on the files that changed on both sides.
+With a merge commit, `dev` stays an ancestor of `main` and subsequent promotions are clean merges
+with nothing to resolve. This is why `main` no longer requires linear history while `dev` still
+does — do not "tidy" the merge commits away.
 
 A hotfix follows the same path — `fix/<slug>` → `dev` → `main`. Nothing skips the promotion PR.
 
